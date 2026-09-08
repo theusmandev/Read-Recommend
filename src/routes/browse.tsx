@@ -1,0 +1,127 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { GENRES, fetchFeed, getVotedIds, voteHelpful, type SortKey } from "@/lib/community";
+import { RecommendationCard } from "@/components/RecommendationCard";
+import { cn } from "@/lib/utils";
+
+export const Route = createFileRoute("/browse")({
+  head: () => ({
+    meta: [
+      { title: "Browse Urdu Novel Recommendations | Urdu Novel Bank" },
+      {
+        name: "description",
+        content:
+          "Read every approved recommendation from the community — filter by genre, sort by newest or most helpful.",
+      },
+      { property: "og:title", content: "Browse Urdu Novel Recommendations" },
+      {
+        property: "og:description",
+        content: "Filter Urdu novel recommendations by genre and find your next read.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Browse,
+});
+
+const genreOptions = ["All", ...GENRES] as const;
+
+function Browse() {
+  const [sort, setSort] = useState<SortKey>("newest");
+  const [genre, setGenre] = useState<string>("All");
+  const [voted, setVoted] = useState<string[]>([]);
+  const queryClient = useQueryClient();
+
+  useEffect(() => setVoted(getVotedIds()), []);
+
+  const feed = useQuery({
+    queryKey: ["feed", sort, genre],
+    queryFn: () => fetchFeed({ sort, genre }),
+  });
+
+  async function handleVote(id: string) {
+    setVoted((prev) => [...prev, id]);
+    try {
+      await voteHelpful(id);
+      toast.success("Shukriya! Marked as helpful.");
+      await queryClient.invalidateQueries({ queryKey: ["feed"] });
+      await queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+    } catch {
+      toast.error("Could not record your vote. Please try again.");
+    }
+  }
+
+  return (
+    <div className="mx-auto max-w-4xl px-4 py-8">
+      <h1 className="font-serif text-2xl font-bold sm:text-3xl">All recommendations</h1>
+      <p className="mt-2 text-muted-foreground">
+        Every novel below was suggested by a reader in the community.
+      </p>
+
+      <div className="mt-6 space-y-3">
+        <div className="flex flex-wrap gap-2">
+          {(["newest", "helpful"] as const).map((key) => (
+            <button
+              key={key}
+              onClick={() => setSort(key)}
+              className={cn(
+                "rounded-full border px-4 py-1.5 text-sm transition-colors",
+                sort === key
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card hover:bg-secondary",
+              )}
+            >
+              {key === "newest" ? "Newest" : "Most helpful"}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {genreOptions.map((option) => (
+            <button
+              key={option}
+              onClick={() => setGenre(option)}
+              className={cn(
+                "rounded-full border px-3 py-1 text-sm transition-colors",
+                genre === option
+                  ? "border-accent bg-accent text-accent-foreground"
+                  : "border-border bg-card text-muted-foreground hover:bg-secondary",
+              )}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-4">
+        {feed.isLoading ? (
+          <p className="text-sm text-muted-foreground">Loading recommendations…</p>
+        ) : feed.isError ? (
+          <p className="text-sm text-destructive">Could not load recommendations right now.</p>
+        ) : feed.data && feed.data.length > 0 ? (
+          feed.data.map((item) => (
+            <RecommendationCard
+              key={item.id}
+              item={item}
+              voted={voted.includes(item.id)}
+              onVote={handleVote}
+            />
+          ))
+        ) : (
+          <div className="rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center">
+            <p className="font-serif text-lg">No recommendations here yet — be the first!</p>
+            <Link
+              to="/submit"
+              className="mt-4 inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+            >
+              Recommend a Novel
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
