@@ -1,0 +1,5 @@
+name = "urdu-novel-hub"
+pages_build_output_dir = ".output/public"
+compatibility_date = "2024-09-08"
+
+# Do not put secrets here! Configure them exclusively within the Cloudflare dashboard.

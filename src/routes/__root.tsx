@@ -82,7 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Urdu Novel Bank" },
       {
         name: "description",
-        content: "A reader community recommending the best Urdu novels.",
+        content: "Discover what readers love. A reader community recommending the best Urdu novels.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -11,12 +11,12 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "A warm community library where Urdu novel readers recommend their favourite books and vote for the ones worth reading next.",
+          "Discover what readers love. A warm community library where Urdu novel readers recommend their favourite books and vote for the ones worth reading next.",
       },
       { property: "og:title", content: "Urdu Novel Bank — Readers Recommend Urdu Novels" },
       {
         property: "og:description",
-        content: "Discover Urdu novels recommended by 3000+ fellow readers, and share your own.",
+        content: "Discover what readers love. Discover Urdu novels recommended by 3000+ fellow readers, and share your own.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
