@@ -1,8 +1,8 @@
 name = "read-recommend"
-main = ".output/server/index.mjs"
+main = "dist/server/server.js"
 compatibility_date = "2024-09-08"
 
 [assets]
-directory = ".output/public"
+directory = "dist/client"
 
 # Do not put secrets here! Configure them exclusively within the Cloudflare dashboard.
