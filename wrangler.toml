@@ -1,5 +1,8 @@
 name = "read-recommend"
-pages_build_output_dir = ".output/public"
+main = ".output/server/index.mjs"
 compatibility_date = "2024-09-08"
+
+[assets]
+directory = ".output/public"
 
 # Do not put secrets here! Configure them exclusively within the Cloudflare dashboard.
