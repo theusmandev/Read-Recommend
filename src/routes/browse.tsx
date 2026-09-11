@@ -47,6 +47,12 @@ function Browse() {
 
     if (isVoted) {
       setVoted((prev) => prev.filter((v) => v !== id));
+      queryClient.setQueriesData({ queryKey: ["feed"] }, (oldData: any) => {
+        if (!Array.isArray(oldData)) return oldData;
+        return oldData.map((item: any) =>
+          item.id === id ? { ...item, helpful_count: item.helpful_count - 1 } : item
+        );
+      });
       try {
         await removeVoteHelpful(id);
         toast.success("Vote removed.");
@@ -54,10 +60,22 @@ function Browse() {
         await queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
       } catch {
         setVoted((prev) => [...prev, id]);
+        queryClient.setQueriesData({ queryKey: ["feed"] }, (oldData: any) => {
+          if (!Array.isArray(oldData)) return oldData;
+          return oldData.map((item: any) =>
+            item.id === id ? { ...item, helpful_count: item.helpful_count + 1 } : item
+          );
+        });
         toast.error("Could not remove your vote. Please try again.");
       }
     } else {
       setVoted((prev) => [...prev, id]);
+      queryClient.setQueriesData({ queryKey: ["feed"] }, (oldData: any) => {
+        if (!Array.isArray(oldData)) return oldData;
+        return oldData.map((item: any) =>
+          item.id === id ? { ...item, helpful_count: item.helpful_count + 1 } : item
+        );
+      });
       try {
         await voteHelpful(id);
         toast.success("Shukriya! Marked as helpful.");
@@ -65,6 +83,12 @@ function Browse() {
         await queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
       } catch {
         setVoted((prev) => prev.filter((v) => v !== id));
+        queryClient.setQueriesData({ queryKey: ["feed"] }, (oldData: any) => {
+          if (!Array.isArray(oldData)) return oldData;
+          return oldData.map((item: any) =>
+            item.id === id ? { ...item, helpful_count: item.helpful_count - 1 } : item
+          );
+        });
         toast.error("Could not record your vote. Please try again.");
       }
     }
