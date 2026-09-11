@@ -113,13 +113,17 @@ export function forgetVote(id: string) {
 }
 
 export async function removeVoteHelpful(recommendationId: string) {
-  const { error } = await supabase
+  const { error, count } = await supabase
     .from("recommendation_votes")
-    .delete()
+    .delete({ count: "exact" })
     .eq("recommendation_id", recommendationId)
     .eq("voter_fingerprint", getFingerprint());
   
   if (error) throw error;
+  if (count === 0) {
+    throw new Error("Vote could not be removed. It may have already been removed, or a database policy blocked the action.");
+  }
+  
   forgetVote(recommendationId);
 }
 
