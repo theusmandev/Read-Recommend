@@ -27,10 +27,10 @@ export function RecommendationCard({
         </span>
       </div>
 
-      <p className="mt-3 text-[0.975rem] leading-relaxed text-foreground/90">{item.reason}</p>
+      <p className="mt-3 text-[0.975rem] leading-relaxed text-foreground/90" dir="auto">{item.reason}</p>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border/70 pt-3">
-        <span className="text-sm text-muted-foreground truncate flex-1 min-w-0">
+        <span className="text-sm text-muted-foreground truncate flex-1 min-w-0" dir="auto">
           — {item.reader_name?.trim() ? item.reader_name : "A reader"}
         </span>
         <button

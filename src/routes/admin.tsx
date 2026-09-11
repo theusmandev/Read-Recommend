@@ -127,17 +127,17 @@ function Admin() {
             <div key={item.id} className="rounded-2xl border border-border bg-card p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <h2 className="font-serif text-lg leading-snug font-semibold truncate">{item.novel_title}</h2>
+                  <h2 className="font-serif text-lg leading-snug font-semibold break-words" dir="auto">{item.novel_title}</h2>
                   {item.novel_author ? (
-                    <p className="mt-0.5 text-sm text-muted-foreground truncate">by {item.novel_author}</p>
+                    <p className="mt-0.5 text-sm text-muted-foreground break-words" dir="auto">by {item.novel_author}</p>
                   ) : null}
                 </div>
                 <span className="shrink-0 rounded-full bg-accent px-3 py-1 text-xs text-accent-foreground">
                   {item.genre}
                 </span>
               </div>
-              <p className="mt-3 leading-relaxed">{item.reason}</p>
-              <p className="mt-2 text-sm text-muted-foreground truncate">
+              <p className="mt-3 leading-relaxed break-words" dir="auto">{item.reason}</p>
+              <p className="mt-2 text-sm text-muted-foreground break-words" dir="auto">
                 — {item.reader_name?.trim() ? item.reader_name : "A reader"}
               </p>
               <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-3">

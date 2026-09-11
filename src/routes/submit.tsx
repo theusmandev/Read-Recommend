@@ -212,6 +212,7 @@ function Submit() {
             placeholder="e.g. Jannat Kay Pattay"
             className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-ring"
             autoComplete="off"
+            dir="auto"
           />
           {matches.length > 0 ? (
             <ul className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-border bg-popover shadow-lg">
@@ -225,9 +226,9 @@ function Submit() {
                     onClick={() => chooseMatch(match)}
                     className="w-full px-3 py-2 text-left text-sm hover:bg-secondary"
                   >
-                    <span className="font-medium">{match.title}</span>
+                    <span className="font-medium" dir="auto">{match.title}</span>
                     {match.author_name ? (
-                      <span className="text-muted-foreground"> — {match.author_name}</span>
+                      <span className="text-muted-foreground" dir="auto"> — {match.author_name}</span>
                     ) : null}
                   </button>
                 </li>
@@ -252,6 +253,7 @@ function Submit() {
             placeholder="e.g. Nimra Ahmed"
             disabled={Boolean(novelId)}
             className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
+            dir="auto"
           />
         </div>
 
@@ -285,6 +287,7 @@ function Submit() {
             onChange={(event) => setReason(event.target.value)}
             placeholder="What made this novel special for you?"
             className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-base leading-relaxed outline-none focus:ring-2 focus:ring-ring"
+            dir="auto"
           />
           <p className="mt-1 text-right text-xs text-muted-foreground">
             {reason.length}/{MAX_REASON}
@@ -295,7 +298,7 @@ function Submit() {
           <div className="flex items-center justify-between rounded-xl bg-secondary/50 px-4 py-3 text-sm">
             <div className="flex items-center gap-2">
               <UserCircle2 className="h-4 w-4 text-muted-foreground" />
-              <span>
+              <span dir="auto">
                 Recommending as: <strong className="font-medium">{savedIdentity.name}</strong>
               </span>
             </div>
@@ -341,6 +344,7 @@ function Submit() {
                 placeholder="e.g. Ayesha"
                 required
                 className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-ring"
+                dir="auto"
               />
             </div>
             <div>
