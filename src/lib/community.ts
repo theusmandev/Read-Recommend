@@ -181,3 +181,12 @@ export async function submitRecommendation(input: {
   });
   if (error) throw error;
 }
+
+export async function debugWhoami() {
+  const { data, error } = await supabase.rpc("debug_whoami");
+  if (error) {
+    console.error("debug_whoami error:", error);
+  } else {
+    console.log("debug_whoami output:", data);
+  }
+}

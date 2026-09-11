@@ -29,7 +29,10 @@ export const Route = createFileRoute("/")({
 function Home() {
   const [voted, setVoted] = useState<string[]>([]);
   
-  useEffect(() => setVoted(getVotedIds()), []);
+  useEffect(() => {
+    setVoted(getVotedIds());
+    import("@/lib/community").then((m) => m.debugWhoami());
+  }, []);
 
   const top = useQuery({
     queryKey: ["feed", "helpful", "All", 3],
