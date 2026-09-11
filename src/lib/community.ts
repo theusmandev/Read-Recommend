@@ -68,6 +68,7 @@ export async function fetchFeed(options: {
   sort: SortKey;
   genre: string;
   limit?: number;
+  offset?: number;
 }): Promise<FeedItem[]> {
   let query = supabase
     .from("recommendations")
@@ -81,7 +82,10 @@ export async function fetchFeed(options: {
       ? query.order("helpful_count", { ascending: false }).order("created_at", { ascending: false })
       : query.order("created_at", { ascending: false });
 
-  const { data, error } = await query.limit(options.limit ?? 60);
+  const { data, error } = await query.range(
+    options.offset ?? 0,
+    (options.offset ?? 0) + (options.limit ?? 30) - 1
+  );
   if (error) throw error;
   return (data ?? []) as unknown as FeedItem[];
 }
@@ -94,8 +98,12 @@ export type LeaderRow = {
   helpful_total: number;
 };
 
-export async function fetchLeaderboard(period: "all" | "month" | "week"): Promise<LeaderRow[]> {
-  const { data, error } = await supabase.rpc("leaderboard", { period });
+export async function fetchLeaderboard(
+  period: "all" | "month" | "week",
+  limit: number = 30,
+  offset: number = 0
+): Promise<LeaderRow[]> {
+  const { data, error } = await supabase.rpc("leaderboard", { period, p_limit: limit, p_offset: offset });
   if (error) throw error;
   return (data ?? []) as LeaderRow[];
 }

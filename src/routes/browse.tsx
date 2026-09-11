@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { GENRES, fetchFeed, getVotedIds, toggleVoteHelpful, type SortKey } from "@/lib/community";
@@ -37,10 +37,16 @@ function Browse() {
 
   useEffect(() => setVoted(getVotedIds()), []);
 
-  const feed = useQuery({
+  const feed = useInfiniteQuery({
     queryKey: ["feed", sort, genre],
-    queryFn: () => fetchFeed({ sort, genre }),
+    queryFn: ({ pageParam }) => fetchFeed({ sort, genre, limit: 30, offset: pageParam as number }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => 
+      lastPage.length === 30 ? allPages.length * 30 : undefined,
+    placeholderData: keepPreviousData,
   });
+
+  const allItems = feed.data?.pages.flat() ?? [];
 
   async function handleVote(id: string) {
     try {
@@ -57,10 +63,15 @@ function Browse() {
 
       // Update React Query cache directly with the exact server response
       queryClient.setQueriesData({ queryKey: ["feed"] }, (oldData: any) => {
-        if (!Array.isArray(oldData)) return oldData;
-        return oldData.map((item: any) =>
-          item.id === id ? { ...item, helpful_count: newCount } : item
-        );
+        if (!oldData || !oldData.pages) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: any[]) =>
+            page.map((item: any) =>
+              item.id === id ? { ...item, helpful_count: newCount } : item
+            )
+          ),
+        };
       });
 
       // Background refresh to keep leaderboards synced
@@ -117,15 +128,31 @@ function Browse() {
           <p className="text-sm text-muted-foreground">Loading recommendations…</p>
         ) : feed.isError ? (
           <p className="text-sm text-destructive">Could not load recommendations right now.</p>
-        ) : feed.data && feed.data.length > 0 ? (
-          feed.data.map((item) => (
-            <RecommendationCard
-              key={item.id}
-              item={item}
-              voted={voted.includes(item.id)}
-              onVote={handleVote}
-            />
-          ))
+        ) : allItems.length > 0 ? (
+          <>
+            <div className={cn("grid gap-4 transition-opacity duration-300", feed.isPlaceholderData && "opacity-50 pointer-events-none")}>
+              {allItems.map((item) => (
+                <RecommendationCard
+                  key={item.id}
+                  item={item}
+                  voted={voted.includes(item.id)}
+                  onVote={handleVote}
+                />
+              ))}
+            </div>
+            
+            {feed.hasNextPage && (
+              <div className="mt-6 text-center">
+                <button
+                  onClick={() => feed.fetchNextPage()}
+                  disabled={feed.isFetchingNextPage}
+                  className="rounded-full border border-border bg-card px-6 py-2.5 text-sm font-semibold transition-colors hover:bg-secondary disabled:opacity-50"
+                >
+                  {feed.isFetchingNextPage ? "Loading more..." : "Load more"}
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center">
             <p className="font-serif text-lg">No recommendations here yet — be the first!</p>

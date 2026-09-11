@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, keepPreviousData } from "@tanstack/react-query";
 import { useState } from "react";
 import { Trophy } from "lucide-react";
 import { fetchLeaderboard } from "@/lib/community";
@@ -36,10 +36,16 @@ const medals = ["🥇", "🥈", "🥉"];
 
 function Leaderboard() {
   const [period, setPeriod] = useState<"all" | "month" | "week">("all");
-  const chart = useQuery({
+  const chart = useInfiniteQuery({
     queryKey: ["leaderboard", period],
-    queryFn: () => fetchLeaderboard(period),
+    queryFn: ({ pageParam }) => fetchLeaderboard(period, 30, pageParam as number),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => 
+      lastPage.length === 30 ? allPages.length * 30 : undefined,
+    placeholderData: keepPreviousData,
   });
+
+  const allItems = chart.data?.pages.flat() ?? [];
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -70,35 +76,51 @@ function Leaderboard() {
       <div className="mt-8 space-y-3">
         {chart.isLoading ? (
           <p className="text-center text-sm text-muted-foreground">Counting votes…</p>
-        ) : chart.data && chart.data.length > 0 ? (
-          chart.data.map((row, index) => (
-            <div
-              key={row.novel_id}
-              className={cn(
-                "flex items-center gap-4 rounded-2xl border bg-card px-5 py-4",
-                index < 3 ? "border-gold/60 shadow-sm" : "border-border",
-              )}
-            >
-              <span className="w-9 text-center text-xl">
-                {medals[index] ?? (
-                  <span className="font-serif text-base text-muted-foreground">{index + 1}</span>
-                )}
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="font-serif text-lg leading-snug font-semibold break-words" dir="auto">{row.title}</p>
-                {row.author_name ? (
-                  <p className="text-sm text-muted-foreground break-words" dir="auto">by {row.author_name}</p>
-                ) : null}
-              </div>
-              <div className="text-right text-sm">
-                <p className="font-semibold">{row.helpful_total} 👍</p>
-                <p className="text-muted-foreground">
-                  {row.recommendation_count}{" "}
-                  {row.recommendation_count === 1 ? "recommendation" : "recommendations"}
-                </p>
-              </div>
+        ) : allItems.length > 0 ? (
+          <>
+            <div className={cn("space-y-3 transition-opacity duration-300", chart.isPlaceholderData && "opacity-50 pointer-events-none")}>
+              {allItems.map((row, index) => (
+                <div
+                  key={row.novel_id}
+                  className={cn(
+                    "flex items-center gap-4 rounded-2xl border bg-card px-5 py-4",
+                    index < 3 ? "border-gold/60 shadow-sm" : "border-border",
+                  )}
+                >
+                  <span className="w-9 text-center text-xl">
+                    {medals[index] ?? (
+                      <span className="font-serif text-base text-muted-foreground">{index + 1}</span>
+                    )}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-serif text-lg leading-snug font-semibold break-words" dir="auto">{row.title}</p>
+                    {row.author_name ? (
+                      <p className="text-sm text-muted-foreground break-words" dir="auto">by {row.author_name}</p>
+                    ) : null}
+                  </div>
+                  <div className="text-right text-sm">
+                    <p className="font-semibold">{row.helpful_total} 👍</p>
+                    <p className="text-muted-foreground">
+                      {row.recommendation_count}{" "}
+                      {row.recommendation_count === 1 ? "recommendation" : "recommendations"}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))
+
+            {chart.hasNextPage && (
+              <div className="mt-6 text-center">
+                <button
+                  onClick={() => chart.fetchNextPage()}
+                  disabled={chart.isFetchingNextPage}
+                  className="rounded-full border border-border bg-card px-6 py-2.5 text-sm font-semibold transition-colors hover:bg-secondary disabled:opacity-50"
+                >
+                  {chart.isFetchingNextPage ? "Loading more..." : "Load more"}
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center">
             <p className="font-serif text-lg">No novels on the chart for this period yet.</p>
