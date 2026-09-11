@@ -95,16 +95,6 @@ export async function searchNovels(q: string): Promise<NovelMatch[]> {
   return (data ?? []) as NovelMatch[];
 }
 
-export async function voteHelpful(recommendationId: string) {
-  const { error } = await supabase.from("recommendation_votes").insert({
-    recommendation_id: recommendationId,
-    voter_fingerprint: getFingerprint(),
-  });
-  // Duplicate vote (unique constraint) is a no-op, not an error for the reader.
-  if (error && error.code !== "23505") throw error;
-  rememberVote(recommendationId);
-}
-
 export function forgetVote(id: string) {
   if (typeof window === "undefined") return;
   const voted = new Set(getVotedIds());
@@ -112,19 +102,27 @@ export function forgetVote(id: string) {
   localStorage.setItem("unb_voted", JSON.stringify([...voted]));
 }
 
-export async function removeVoteHelpful(recommendationId: string) {
-  const { error, count } = await supabase
-    .from("recommendation_votes")
-    .delete({ count: "exact" })
-    .eq("recommendation_id", recommendationId)
-    .eq("voter_fingerprint", getFingerprint());
-  
+export async function toggleVoteHelpful(recommendationId: string) {
+  const { data, error } = await supabase.rpc("toggle_helpful_vote", {
+    p_recommendation_id: recommendationId,
+    p_voter_fingerprint: getFingerprint(),
+  });
+
   if (error) throw error;
-  if (count === 0) {
-    throw new Error("Vote could not be removed. It may have already been removed, or a database policy blocked the action.");
-  }
+  if (!data || data.length === 0) throw new Error("No response from toggle function");
+
+  const result = data[0];
   
-  forgetVote(recommendationId);
+  if (result.is_voted) {
+    rememberVote(recommendationId);
+  } else {
+    forgetVote(recommendationId);
+  }
+
+  return {
+    isVoted: result.is_voted,
+    newCount: result.new_count,
+  };
 }
 
 export async function submitRecommendation(input: {
@@ -182,11 +180,3 @@ export async function submitRecommendation(input: {
   if (error) throw error;
 }
 
-export async function debugWhoami() {
-  const { data, error } = await supabase.rpc("debug_whoami");
-  if (error) {
-    console.error("debug_whoami error:", error);
-  } else {
-    console.log("debug_whoami output:", data);
-  }
-}

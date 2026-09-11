@@ -31,7 +31,6 @@ function Home() {
   
   useEffect(() => {
     setVoted(getVotedIds());
-    import("@/lib/community").then((m) => m.debugWhoami());
   }, []);
 
   const top = useQuery({

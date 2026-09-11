@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { GENRES, fetchFeed, getVotedIds, voteHelpful, removeVoteHelpful, type SortKey } from "@/lib/community";
+import { GENRES, fetchFeed, getVotedIds, toggleVoteHelpful, type SortKey } from "@/lib/community";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import { cn } from "@/lib/utils";
 
@@ -43,54 +43,30 @@ function Browse() {
   });
 
   async function handleVote(id: string) {
-    const isVoted = voted.includes(id);
-
-    if (isVoted) {
-      setVoted((prev) => prev.filter((v) => v !== id));
-      queryClient.setQueriesData({ queryKey: ["feed"] }, (oldData: any) => {
-        if (!Array.isArray(oldData)) return oldData;
-        return oldData.map((item: any) =>
-          item.id === id ? { ...item, helpful_count: item.helpful_count - 1 } : item
-        );
-      });
-      try {
-        await removeVoteHelpful(id);
-        toast.success("Vote removed.");
-        await queryClient.invalidateQueries({ queryKey: ["feed"] });
-        await queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
-      } catch {
+    try {
+      const { isVoted, newCount } = await toggleVoteHelpful(id);
+      
+      // Update local React state for the immediate visual toggle
+      if (isVoted) {
         setVoted((prev) => [...prev, id]);
-        queryClient.setQueriesData({ queryKey: ["feed"] }, (oldData: any) => {
-          if (!Array.isArray(oldData)) return oldData;
-          return oldData.map((item: any) =>
-            item.id === id ? { ...item, helpful_count: item.helpful_count + 1 } : item
-          );
-        });
-        toast.error("Could not remove your vote. Please try again.");
+        toast.success("Shukriya! Marked as helpful.");
+      } else {
+        setVoted((prev) => prev.filter((v) => v !== id));
+        toast.success("Vote removed.");
       }
-    } else {
-      setVoted((prev) => [...prev, id]);
+
+      // Update React Query cache directly with the exact server response
       queryClient.setQueriesData({ queryKey: ["feed"] }, (oldData: any) => {
         if (!Array.isArray(oldData)) return oldData;
         return oldData.map((item: any) =>
-          item.id === id ? { ...item, helpful_count: item.helpful_count + 1 } : item
+          item.id === id ? { ...item, helpful_count: newCount } : item
         );
       });
-      try {
-        await voteHelpful(id);
-        toast.success("Shukriya! Marked as helpful.");
-        await queryClient.invalidateQueries({ queryKey: ["feed"] });
-        await queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
-      } catch {
-        setVoted((prev) => prev.filter((v) => v !== id));
-        queryClient.setQueriesData({ queryKey: ["feed"] }, (oldData: any) => {
-          if (!Array.isArray(oldData)) return oldData;
-          return oldData.map((item: any) =>
-            item.id === id ? { ...item, helpful_count: item.helpful_count - 1 } : item
-          );
-        });
-        toast.error("Could not record your vote. Please try again.");
-      }
+
+      // Background refresh to keep leaderboards synced
+      queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+    } catch {
+      toast.error("Could not record your vote. Please try again.");
     }
   }
 
