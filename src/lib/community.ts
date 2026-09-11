@@ -3,7 +3,22 @@
 // only approved recommendations are readable, submissions always start pending.
 import { supabase } from "@/integrations/supabase/client";
 
-export const GENRES = ["Romance", "Social", "Mystery", "Historical", "Fantasy", "Other"] as const;
+export const GENRES = [
+  "Romance",
+  "Social",
+  "Mystery",
+  "Historical",
+  "Fantasy",
+  "Islamic/Spiritual",
+  "Family Drama",
+  "Crime/Thriller",
+  "Tragedy",
+  "Comedy/Humor",
+  "Adventure",
+  "Classic",
+  "Self Help",
+  "Other",
+] as const;
 export type Genre = (typeof GENRES)[number];
 
 export type FeedItem = {
