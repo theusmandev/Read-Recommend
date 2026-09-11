@@ -85,9 +85,9 @@ function Leaderboard() {
                 )}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="font-serif text-lg leading-snug font-semibold truncate">{row.title}</p>
+                <p className="font-serif text-lg leading-snug font-semibold break-words" dir="auto">{row.title}</p>
                 {row.author_name ? (
-                  <p className="text-sm text-muted-foreground truncate">by {row.author_name}</p>
+                  <p className="text-sm text-muted-foreground break-words" dir="auto">by {row.author_name}</p>
                 ) : null}
               </div>
               <div className="text-right text-sm">

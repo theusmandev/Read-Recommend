@@ -15,11 +15,11 @@ export function RecommendationCard({
     <article className="rounded-2xl border border-border bg-card p-5 shadow-[0_1px_0_0_var(--color-border)] transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="font-serif text-lg leading-snug font-semibold text-foreground truncate">
+          <h3 className="font-serif text-lg leading-snug font-semibold text-foreground break-words" dir="auto">
             {item.novels?.title}
           </h3>
           {item.novels?.author_name ? (
-            <p className="mt-0.5 text-sm text-muted-foreground truncate">by {item.novels.author_name}</p>
+            <p className="mt-0.5 text-sm text-muted-foreground break-words" dir="auto">by {item.novels.author_name}</p>
           ) : null}
         </div>
         <span className="shrink-0 rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">

@@ -105,8 +105,8 @@ function Home() {
                 {index + 1}
               </span>
               <span className="flex-1 min-w-0">
-                <span className="block font-medium truncate">{row.title}</span>
-                <span className="block text-sm text-muted-foreground truncate">{row.author_name}</span>
+                <span className="block font-medium break-words" dir="auto">{row.title}</span>
+                <span className="block text-sm text-muted-foreground break-words" dir="auto">{row.author_name}</span>
               </span>
               <span className="shrink-0 text-sm text-muted-foreground">{row.helpful_total} 👍</span>
             </li>
