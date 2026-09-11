@@ -12,12 +12,12 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Discover what readers love. A warm community library where Urdu novel readers recommend their favourite books and vote for the ones worth reading next.",
+          "Discover the novels that stayed with people, see why they loved them, and share your own favourite.",
       },
       { property: "og:title", content: "Urdu Novel Bank — Readers Recommend Urdu Novels" },
       {
         property: "og:description",
-        content: "Discover what readers love. Discover Urdu novels recommended by 3000+ fellow readers, and share your own.",
+        content: "Discover the novels that stayed with people, see why they loved them, and share your own favourite.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -44,14 +44,13 @@ function Home() {
     <div className="mx-auto max-w-4xl px-4 pb-4">
       <section className="paper mt-6 rounded-3xl border border-border px-6 py-12 text-center sm:py-16">
         <p className="inline-flex items-center gap-2 rounded-full bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-          <Sparkles className="h-3.5 w-3.5" /> A reading circle of 3000+ Urdu novel lovers
+          <Sparkles className="h-3.5 w-3.5" /> A reading circle built by readers
         </p>
         <h1 className="mt-5 font-serif text-4xl leading-tight font-bold text-foreground sm:text-5xl">
-          Kaunsa novel parhein?
+          Read what readers actually loved.
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
-          Readers share the Urdu novels that stayed with them — and why. Read their reasons, mark
-          the ones that help you, and add your own favourite to the shelf.
+          Discover the novels that stayed with people, see why they loved them, and share your own favourite.
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
           <Link
