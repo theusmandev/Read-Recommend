@@ -4,8 +4,8 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export const GENRES = [
-  "Romance",
   "Social",
+  "Romance",
   "Mystery",
   "Historical",
   "Fantasy",

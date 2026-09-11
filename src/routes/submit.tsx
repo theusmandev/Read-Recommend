@@ -47,7 +47,7 @@ function Submit() {
   const [matches, setMatches] = useState<NovelMatch[]>([]);
   
   const [reason, setReason] = useState("");
-  const [genre, setGenre] = useState<Genre>("Romance");
+  const [genre, setGenre] = useState<Genre>("Social");
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
 
