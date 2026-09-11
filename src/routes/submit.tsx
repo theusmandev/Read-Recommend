@@ -87,10 +87,7 @@ function Submit() {
     setMatches([]);
   }
 
-  function handleClearIdentity() {
-    localStorage.removeItem("reader_name");
-    localStorage.removeItem("reader_email");
-    setSavedIdentity(null);
+  function handleChangeIdentity() {
     setModalName("");
     setModalEmail("");
     setIsModalOpen(true);
@@ -304,7 +301,7 @@ function Submit() {
             </div>
             <button
               type="button"
-              onClick={handleClearIdentity}
+              onClick={handleChangeIdentity}
               className="text-xs text-muted-foreground hover:text-foreground underline decoration-muted-foreground/50 underline-offset-4"
             >
               Not you? Change
