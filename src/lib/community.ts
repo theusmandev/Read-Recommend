@@ -105,6 +105,24 @@ export async function voteHelpful(recommendationId: string) {
   rememberVote(recommendationId);
 }
 
+export function forgetVote(id: string) {
+  if (typeof window === "undefined") return;
+  const voted = new Set(getVotedIds());
+  voted.delete(id);
+  localStorage.setItem("unb_voted", JSON.stringify([...voted]));
+}
+
+export async function removeVoteHelpful(recommendationId: string) {
+  const { error } = await supabase
+    .from("recommendation_votes")
+    .delete()
+    .eq("recommendation_id", recommendationId)
+    .eq("voter_fingerprint", getFingerprint());
+  
+  if (error) throw error;
+  forgetVote(recommendationId);
+}
+
 export async function submitRecommendation(input: {
   novelId: string | null;
   title: string;

@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { PenLine, Sparkles, Trophy } from "lucide-react";
-import { fetchFeed, fetchLeaderboard } from "@/lib/community";
+import { useState, useEffect } from "react";
+import { fetchFeed, fetchLeaderboard, getVotedIds } from "@/lib/community";
 import { RecommendationCard } from "@/components/RecommendationCard";
 
 export const Route = createFileRoute("/")({
@@ -26,6 +27,10 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const [voted, setVoted] = useState<string[]>([]);
+  
+  useEffect(() => setVoted(getVotedIds()), []);
+
   const top = useQuery({
     queryKey: ["feed", "helpful", "All", 3],
     queryFn: () => fetchFeed({ sort: "helpful", genre: "All", limit: 3 }),
@@ -75,7 +80,7 @@ function Home() {
           {top.isLoading ? (
             <p className="text-sm text-muted-foreground">Loading recommendations…</p>
           ) : top.data && top.data.length > 0 ? (
-            top.data.map((item) => <RecommendationCard key={item.id} item={item} voted />)
+            top.data.map((item) => <RecommendationCard key={item.id} item={item} voted={voted.includes(item.id)} />)
           ) : (
             <EmptyShelf />
           )}

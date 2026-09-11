@@ -35,7 +35,7 @@ export function RecommendationCard({
         </span>
         <button
           type="button"
-          disabled={!onVote || voted}
+          disabled={!onVote}
           onClick={() => onVote?.(item.id)}
           className={cn(
             "inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors",

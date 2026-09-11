@@ -85,10 +85,7 @@ export function SiteFooter() {
     <footer className="mt-16 border-t border-border/70 py-8 text-center text-sm text-muted-foreground">
       <p className="font-serif italic">Kitaabein dost hoti hain — books are friends.</p>
       <p className="mt-2">
-        Made by readers, for readers ·{" "}
-        <Link to="/admin" className="underline underline-offset-4 hover:text-foreground">
-          Moderation
-        </Link>
+        Made by readers, for readers
       </p>
     </footer>
   );

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { GENRES, fetchFeed, getVotedIds, voteHelpful, type SortKey } from "@/lib/community";
+import { GENRES, fetchFeed, getVotedIds, voteHelpful, removeVoteHelpful, type SortKey } from "@/lib/community";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import { cn } from "@/lib/utils";
 
@@ -43,14 +43,30 @@ function Browse() {
   });
 
   async function handleVote(id: string) {
-    setVoted((prev) => [...prev, id]);
-    try {
-      await voteHelpful(id);
-      toast.success("Shukriya! Marked as helpful.");
-      await queryClient.invalidateQueries({ queryKey: ["feed"] });
-      await queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
-    } catch {
-      toast.error("Could not record your vote. Please try again.");
+    const isVoted = voted.includes(id);
+
+    if (isVoted) {
+      setVoted((prev) => prev.filter((v) => v !== id));
+      try {
+        await removeVoteHelpful(id);
+        toast.success("Vote removed.");
+        await queryClient.invalidateQueries({ queryKey: ["feed"] });
+        await queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+      } catch {
+        setVoted((prev) => [...prev, id]);
+        toast.error("Could not remove your vote. Please try again.");
+      }
+    } else {
+      setVoted((prev) => [...prev, id]);
+      try {
+        await voteHelpful(id);
+        toast.success("Shukriya! Marked as helpful.");
+        await queryClient.invalidateQueries({ queryKey: ["feed"] });
+        await queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+      } catch {
+        setVoted((prev) => prev.filter((v) => v !== id));
+        toast.error("Could not record your vote. Please try again.");
+      }
     }
   }
 
