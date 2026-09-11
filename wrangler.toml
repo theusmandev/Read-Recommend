@@ -1,6 +1,6 @@
 name = "read-recommend"
 main = "dist/server/server.js"
-compatibility_date = "2024-09-08"
+compatibility_date = "2026-09-11"
 compatibility_flags = ["nodejs_compat"]
 
 [assets]
