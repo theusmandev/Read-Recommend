@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ThumbsUp } from "lucide-react";
 import type { FeedItem } from "@/lib/community";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,18 @@ export function RecommendationCard({
   voted: boolean;
   onVote?: (id: string) => void;
 }) {
+  const [isVoting, setIsVoting] = useState(false);
+
+  async function handleClick() {
+    if (!onVote) return;
+    setIsVoting(true);
+    try {
+      await onVote(item.id);
+    } finally {
+      setIsVoting(false);
+    }
+  }
+
   return (
     <article className="rounded-2xl border border-border bg-card p-5 shadow-[0_1px_0_0_var(--color-border)] transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
@@ -35,18 +48,18 @@ export function RecommendationCard({
         </span>
         <button
           type="button"
-          disabled={!onVote}
-          onClick={() => onVote?.(item.id)}
+          disabled={!onVote || isVoting}
+          onClick={handleClick}
           className={cn(
             "inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors",
             voted
-              ? "border-primary/30 bg-primary/10 text-primary"
+              ? "border-primary/30 bg-primary/15 text-primary"
               : "border-border hover:border-primary/40 hover:bg-secondary",
-            !onVote && "cursor-default",
+            (!onVote || isVoting) && "cursor-default opacity-70",
           )}
           aria-label="Mark this recommendation as helpful"
         >
-          <ThumbsUp className="h-4 w-4" />
+          <ThumbsUp className={cn("h-4 w-4", voted && "fill-current")} />
           {item.helpful_count} found this helpful
         </button>
       </div>
