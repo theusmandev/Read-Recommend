@@ -88,8 +88,13 @@ function Submit() {
   }
 
   function handleChangeIdentity() {
-    setModalName("");
-    setModalEmail("");
+    if (savedIdentity) {
+      setModalName(savedIdentity.name);
+      setModalEmail(savedIdentity.email);
+    } else {
+      setModalName("");
+      setModalEmail("");
+    }
     setIsModalOpen(true);
   }
 
