@@ -7,6 +7,7 @@ export function RecommendationCard({
   item,
   voted,
   onVote,
+  onDelete,
 }: {
   item: FeedItem;
   voted: boolean;
