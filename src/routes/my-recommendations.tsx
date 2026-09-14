@@ -30,7 +30,10 @@ export const Route = createFileRoute("/my-recommendations")({
 
 function MyRecommendations() {
   const queryClient = useQueryClient();
-  const [readerId, setReaderId] = useState<string | null>(null);
+  const [readerId, setReaderId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("reader_id");
+  });
   
   // Identity state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,10 +46,13 @@ function MyRecommendations() {
     // Check localStorage for saved identity
     const name = localStorage.getItem("reader_name");
     const email = localStorage.getItem("reader_email");
+    const id = localStorage.getItem("reader_id");
     
-    if (name && email) {
+    // If we don't have the ID but have name/email, resolve it
+    if (!id && name && email) {
       resolveIdentity(name, email);
-    } else {
+    } else if (!id && (!name || !email)) {
+      // If we don't have anything, show the modal
       setIsModalOpen(true);
     }
   }, []);
@@ -54,6 +60,7 @@ function MyRecommendations() {
   async function resolveIdentity(name: string, email: string) {
     try {
       const id = await getReaderId(name, email);
+      localStorage.setItem("reader_id", id);
       setReaderId(id);
     } catch (e) {
       toast.error("Failed to verify your identity.");
@@ -81,6 +88,7 @@ function MyRecommendations() {
       const id = await getReaderId(name, email);
       localStorage.setItem("reader_name", name);
       localStorage.setItem("reader_email", email);
+      localStorage.setItem("reader_id", id);
       setReaderId(id);
       setIsModalOpen(false);
     } catch (e) {
