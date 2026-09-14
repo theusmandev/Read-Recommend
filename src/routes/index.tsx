@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PenLine, Sparkles, Trophy } from "lucide-react";
 import { useState, useEffect } from "react";
 import { fetchFeed, fetchLeaderboard, fetchAllGenreCounts, getVotedIds } from "@/lib/community";
+import { formatLargeNumber } from "@/lib/utils";
 import { RecommendationCard } from "@/components/RecommendationCard";
 
 export const Route = createFileRoute("/")({
@@ -54,7 +55,7 @@ function Home() {
           <div className="mx-auto mb-8 flex flex-col items-center justify-center">
             <div className="relative inline-flex items-start">
               <span className="font-serif text-5xl font-bold leading-none tracking-tight text-primary sm:text-6xl">
-                {totalCount}+
+                {formatLargeNumber(totalCount)}+
               </span>
               <Sparkles className="absolute -right-6 -top-2 h-5 w-5 text-primary/50 sm:-right-8 sm:-top-3 sm:h-6 sm:w-6" />
             </div>
