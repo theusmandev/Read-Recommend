@@ -37,6 +37,7 @@ function MyRecommendations() {
   const [modalName, setModalName] = useState("");
   const [modalEmail, setModalEmail] = useState("");
   const [savingIdentity, setSavingIdentity] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<FeedItem | null>(null);
 
   useEffect(() => {
     // Check localStorage for saved identity
@@ -139,9 +140,7 @@ function MyRecommendations() {
                   item={item}
                   voted={false}
                   onDelete={(id) => {
-                    if (window.confirm("Are you sure you want to delete this recommendation?")) {
-                      deleteMutation.mutate(id);
-                    }
+                    setItemToDelete(item);
                   }}
                 />
               ))}
@@ -205,6 +204,36 @@ function MyRecommendations() {
               {savingIdentity ? "Verifying…" : "View My Recommendations"}
             </button>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-xl">Delete Recommendation</DialogTitle>
+            <DialogDescription className="mt-2">
+              Are you sure you want to delete your recommendation for <strong className="font-medium text-foreground">{itemToDelete?.novels?.title}</strong>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-6 flex flex-wrap justify-end gap-3">
+            <button
+              onClick={() => setItemToDelete(null)}
+              className="rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                if (itemToDelete) {
+                  deleteMutation.mutate(itemToDelete.id);
+                  setItemToDelete(null);
+                }
+              }}
+              className="rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            >
+              Delete
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
