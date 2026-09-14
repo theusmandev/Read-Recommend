@@ -229,3 +229,18 @@ export async function getReaderId(name: string, email: string): Promise<string> 
   if (error) throw error;
   return readerId;
 }
+
+export async function fetchCount(genre: string): Promise<number> {
+  let query = supabase
+    .from("recommendations")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "approved");
+
+  if (genre !== "All") {
+    query = query.eq("genre", genre);
+  }
+
+  const { count, error } = await query;
+  if (error) throw error;
+  return count ?? 0;
+}
