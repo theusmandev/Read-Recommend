@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useInfiniteQuery, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { GENRES, fetchFeed, fetchCount, getVotedIds, toggleVoteHelpful, type SortKey } from "@/lib/community";
+import { GENRES, fetchFeed, fetchAllGenreCounts, getVotedIds, toggleVoteHelpful, type SortKey } from "@/lib/community";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import { cn } from "@/lib/utils";
 
@@ -46,11 +46,11 @@ function Browse() {
     placeholderData: keepPreviousData,
   });
 
-  const countQuery = useQuery({
-    queryKey: ["feed-count", genre],
-    queryFn: () => fetchCount(genre),
+  const countsQuery = useQuery({
+    queryKey: ["feed-counts"],
+    queryFn: fetchAllGenreCounts,
   });
-  const totalCount = countQuery.data ?? 0;
+  const genreCounts = countsQuery.data ?? {};
 
   const allItems = feed.data?.pages.flat() ?? [];
 
@@ -91,11 +91,6 @@ function Browse() {
     <div className="mx-auto max-w-4xl px-4 py-8">
       <h1 className="font-serif text-2xl font-bold sm:text-3xl flex items-center gap-2 flex-wrap">
         {genre === "All" ? "All recommendations" : `${genre} recommendations`}
-        {totalCount > 0 && (
-          <span className="text-base font-normal text-muted-foreground tracking-normal font-sans">
-            · {totalCount} {totalCount === 1 ? 'novel' : 'novels'}
-          </span>
-        )}
       </h1>
       <p className="mt-2 text-muted-foreground">
         Every novel below was suggested by a reader in the community.
@@ -131,6 +126,11 @@ function Browse() {
               )}
             >
               {option}
+              {genreCounts[option] !== undefined && (
+                <span className="ml-1.5 inline-block opacity-70 text-[0.9em]">
+                  ({genreCounts[option]})
+                </span>
+              )}
             </button>
           ))}
         </div>

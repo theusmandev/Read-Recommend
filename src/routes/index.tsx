@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { PenLine, Sparkles, Trophy } from "lucide-react";
 import { useState, useEffect } from "react";
-import { fetchFeed, fetchLeaderboard, fetchCount, getVotedIds } from "@/lib/community";
+import { fetchFeed, fetchLeaderboard, fetchAllGenreCounts, getVotedIds } from "@/lib/community";
 import { RecommendationCard } from "@/components/RecommendationCard";
 
 export const Route = createFileRoute("/")({
@@ -41,19 +41,25 @@ function Home() {
     queryKey: ["leaderboard", "all", "home"],
     queryFn: () => fetchLeaderboard("all"),
   });
-  const countQuery = useQuery({
-    queryKey: ["feed-count", "All"],
-    queryFn: () => fetchCount("All"),
+  const countsQuery = useQuery({
+    queryKey: ["feed-counts"],
+    queryFn: fetchAllGenreCounts,
   });
-  const totalCount = countQuery.data ?? 0;
+  const totalCount = countsQuery.data?.["All"] ?? 0;
 
   return (
     <div className="mx-auto max-w-4xl px-4 pb-4">
       <section className="paper mt-6 rounded-3xl border border-border px-6 py-12 text-center sm:py-16">
-        <p className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground">
-          <Sparkles className="h-3.5 w-3.5 text-primary" /> 
-          {totalCount > 0 ? `${totalCount}+ novels recommended by readers` : "A reading circle built by readers"}
-        </p>
+        <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm shadow-sm transition-colors hover:bg-primary/10">
+          <Sparkles className="h-4 w-4 text-primary" />
+          {totalCount > 0 ? (
+            <span className="text-muted-foreground">
+              <strong className="font-semibold text-foreground">{totalCount}+ novels</strong> recommended by readers
+            </span>
+          ) : (
+            <span className="text-muted-foreground font-medium">A reading circle built by readers</span>
+          )}
+        </div>
         <h1 className="mt-5 font-serif text-4xl leading-tight font-bold text-foreground sm:text-5xl">
           Read what readers actually loved.
         </h1>

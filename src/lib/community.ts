@@ -230,17 +230,31 @@ export async function getReaderId(name: string, email: string): Promise<string> 
   return readerId;
 }
 
-export async function fetchCount(genre: string): Promise<number> {
-  let query = supabase
-    .from("recommendations")
-    .select("*", { count: "exact", head: true })
-    .eq("status", "approved");
-
-  if (genre !== "All") {
-    query = query.eq("genre", genre);
+export async function fetchAllGenreCounts(): Promise<Record<string, number>> {
+  // Try the efficient RPC first (1 query)
+  const { data, error } = await supabase.rpc("get_genre_counts");
+  
+  if (error) {
+    // Fallback if migration hasn't applied yet
+    const promises = ["All", ...GENRES].map(async (genre) => {
+      let query = supabase.from("recommendations").select("*", { count: "exact", head: true }).eq("status", "approved");
+      if (genre !== "All") query = query.eq("genre", genre);
+      const { count } = await query;
+      return { genre, count: count ?? 0 };
+    });
+    const results = await Promise.all(promises);
+    return results.reduce((acc, curr) => {
+      acc[curr.genre] = curr.count;
+      return acc;
+    }, {} as Record<string, number>);
   }
 
-  const { count, error } = await query;
-  if (error) throw error;
-  return count ?? 0;
+  const counts: Record<string, number> = { All: 0 };
+  let total = 0;
+  for (const row of data || []) {
+    counts[row.genre] = Number(row.count);
+    total += Number(row.count);
+  }
+  counts["All"] = total;
+  return counts;
 }
