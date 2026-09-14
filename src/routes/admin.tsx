@@ -45,6 +45,7 @@ function Admin() {
 
       return { unlocked: true };
     },
+    staleTime: 0,
   });
 
   const unlocked = status.data?.unlocked === true;
@@ -75,6 +76,7 @@ function Admin() {
       });
     },
     enabled: unlocked,
+    staleTime: 0,
   });
 
   const moderateMutation = useMutation({

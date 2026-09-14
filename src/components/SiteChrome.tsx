@@ -1,4 +1,6 @@
 import { Link } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { fetchFeed, fetchLeaderboard } from "@/lib/community";
 import { BookHeart, Menu } from "lucide-react";
 import {
   Sheet,
@@ -18,6 +20,24 @@ const navItems = [
 ] as const;
 
 export function SiteHeader() {
+  const queryClient = useQueryClient();
+
+  const handlePrefetch = (path: string) => {
+    if (path === "/browse") {
+      queryClient.prefetchInfiniteQuery({
+        queryKey: ["feed", "newest", "All"],
+        queryFn: () => fetchFeed({ sort: "newest", genre: "All", limit: 30, offset: 0 }),
+        initialPageParam: 0,
+      });
+    } else if (path === "/leaderboard") {
+      queryClient.prefetchInfiniteQuery({
+        queryKey: ["leaderboard", "all"],
+        queryFn: () => fetchLeaderboard("all", 30, 0),
+        initialPageParam: 0,
+      });
+    }
+  };
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur">
       <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3">
@@ -37,6 +57,8 @@ export function SiteHeader() {
               key={item.to}
               to={item.to}
               activeOptions={{ exact: item.to === "/" }}
+              onMouseEnter={() => handlePrefetch(item.to)}
+              onFocus={() => handlePrefetch(item.to)}
               className="rounded-full px-3 py-1.5 whitespace-nowrap text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground [&.active]:bg-secondary [&.active]:font-semibold [&.active]:text-foreground"
             >
               {item.label}
