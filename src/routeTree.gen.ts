@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as MyRecommendationsRouteImport } from './routes/my-recommendations'
 import { Route as SubmitRouteImport } from './routes/submit'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const LeaderboardRoute = LeaderboardRouteImport.update({
   path: '/leaderboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MyRecommendationsRoute = MyRecommendationsRouteImport.update({
+  id: '/my-recommendations',
+  path: '/my-recommendations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SubmitRoute = SubmitRouteImport.update({
   id: '/submit',
   path: '/submit',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/my-recommendations': typeof MyRecommendationsRoute
   '/submit': typeof SubmitRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/my-recommendations': typeof MyRecommendationsRoute
   '/submit': typeof SubmitRoute
 }
 export interface FileRoutesById {
@@ -61,14 +69,34 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/my-recommendations': typeof MyRecommendationsRoute
   '/submit': typeof SubmitRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/browse' | '/leaderboard' | '/submit'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/browse'
+    | '/leaderboard'
+    | '/my-recommendations'
+    | '/submit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/browse' | '/leaderboard' | '/submit'
-  id: '__root__' | '/' | '/admin' | '/browse' | '/leaderboard' | '/submit'
+  to:
+    | '/'
+    | '/admin'
+    | '/browse'
+    | '/leaderboard'
+    | '/my-recommendations'
+    | '/submit'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/browse'
+    | '/leaderboard'
+    | '/my-recommendations'
+    | '/submit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,6 +104,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   BrowseRoute: typeof BrowseRoute
   LeaderboardRoute: typeof LeaderboardRoute
+  MyRecommendationsRoute: typeof MyRecommendationsRoute
   SubmitRoute: typeof SubmitRoute
 }
 
@@ -109,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LeaderboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/my-recommendations': {
+      id: '/my-recommendations'
+      path: '/my-recommendations'
+      fullPath: '/my-recommendations'
+      preLoaderRoute: typeof MyRecommendationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/submit': {
       id: '/submit'
       path: '/submit'
@@ -124,6 +160,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   BrowseRoute: BrowseRoute,
   LeaderboardRoute: LeaderboardRoute,
+  MyRecommendationsRoute: MyRecommendationsRoute,
   SubmitRoute: SubmitRoute,
 }
 export const routeTree = rootRouteImport

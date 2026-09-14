@@ -14,6 +14,7 @@ const navItems = [
   { to: "/browse", label: "Browse" },
   { to: "/leaderboard", label: "Readers' Choice" },
   { to: "/submit", label: "Recommend" },
+  { to: "/my-recommendations", label: "My Recommendations" },
 ] as const;
 
 export function SiteHeader() {

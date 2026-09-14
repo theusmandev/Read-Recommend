@@ -11,6 +11,7 @@ export function RecommendationCard({
   item: FeedItem;
   voted: boolean;
   onVote?: (id: string) => void;
+  onDelete?: (id: string) => void;
 }) {
   const [isVoting, setIsVoting] = useState(false);
 
@@ -35,9 +36,21 @@ export function RecommendationCard({
             <p className="mt-0.5 text-sm text-muted-foreground break-words" dir="auto">by {item.novels.author_name}</p>
           ) : null}
         </div>
-        <span className="shrink-0 rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
-          {item.genre}
-        </span>
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          <span className="rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
+            {item.genre}
+          </span>
+          {item.status && (
+            <span className={cn(
+              "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+              item.status === 'approved' ? "bg-green-500/15 text-green-700 dark:text-green-400" :
+              item.status === 'rejected' ? "bg-red-500/15 text-red-700 dark:text-red-400" :
+              "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400"
+            )}>
+              {item.status}
+            </span>
+          )}
+        </div>
       </div>
 
       <p className="mt-3 text-[0.975rem] leading-relaxed text-foreground/90" dir="auto">{item.reason}</p>
@@ -46,22 +59,33 @@ export function RecommendationCard({
         <span className="text-sm text-muted-foreground truncate flex-1 min-w-0" dir="auto">
           — {item.reader_name?.trim() ? item.reader_name : "A reader"}
         </span>
-        <button
-          type="button"
-          disabled={!onVote || isVoting}
-          onClick={handleClick}
-          className={cn(
-            "inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors",
-            voted
-              ? "border-primary/30 bg-primary/15 text-primary"
-              : "border-border hover:border-primary/40 hover:bg-secondary",
-            (!onVote || isVoting) && "cursor-default opacity-70",
+        <div className="flex items-center gap-2">
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(item.id)}
+              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-500/20"
+            >
+              Delete
+            </button>
           )}
-          aria-label="Mark this recommendation as helpful"
-        >
-          <ThumbsUp className={cn("h-4 w-4", voted && "fill-current")} />
-          {item.helpful_count} found this helpful
-        </button>
+          <button
+            type="button"
+            disabled={!onVote || isVoting}
+            onClick={handleClick}
+            className={cn(
+              "inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors",
+              voted
+                ? "border-primary/30 bg-primary/15 text-primary"
+                : "border-border hover:border-primary/40 hover:bg-secondary",
+              (!onVote || isVoting) && "cursor-default opacity-70",
+            )}
+            aria-label="Mark this recommendation as helpful"
+          >
+            <ThumbsUp className={cn("h-4 w-4", voted && "fill-current")} />
+            {item.helpful_count} found this helpful
+          </button>
+        </div>
       </div>
     </article>
   );

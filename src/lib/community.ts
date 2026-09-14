@@ -28,6 +28,7 @@ export type FeedItem = {
   genre: string;
   helpful_count: number;
   created_at: string;
+  status?: "pending" | "approved" | "rejected";
   novels: { id: string; title: string; author_name: string } | null;
 };
 
@@ -203,3 +204,28 @@ export async function submitRecommendation(input: {
   if (error) throw error;
 }
 
+export async function fetchMyRecommendations(readerId: string): Promise<FeedItem[]> {
+  const { data, error } = await supabase
+    .rpc("get_my_recommendations", { p_reader_id: readerId })
+    .select("id, reader_name, reason, genre, status, helpful_count, created_at, novels(id, title, author_name)");
+
+  if (error) throw error;
+  return (data ?? []) as unknown as FeedItem[];
+}
+
+export async function deleteMyRecommendation(recommendationId: string, readerId: string) {
+  const { error } = await supabase.rpc("delete_my_recommendation", {
+    p_recommendation_id: recommendationId,
+    p_reader_id: readerId,
+  });
+  if (error) throw error;
+}
+
+export async function getReaderId(name: string, email: string): Promise<string> {
+  const { data: readerId, error } = await supabase.rpc("upsert_reader", {
+    p_name: name.trim(),
+    p_email: email.trim(),
+  });
+  if (error) throw error;
+  return readerId;
+}
