@@ -48,7 +48,7 @@ export function RecommendationCard({
               item.status === 'rejected' ? "bg-red-500/15 text-red-700 dark:text-red-400" :
               "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400"
             )}>
-              {item.status}
+              {item.status === 'rejected' ? 'Not Approved' : item.status}
             </span>
           )}
         </div>
