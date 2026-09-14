@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useInfiniteQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { GENRES, fetchFeed, fetchCount, getVotedIds, toggleVoteHelpful, type SortKey } from "@/lib/community";
