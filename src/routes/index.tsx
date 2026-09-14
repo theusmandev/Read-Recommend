@@ -50,16 +50,26 @@ function Home() {
   return (
     <div className="mx-auto max-w-4xl px-4 pb-4">
       <section className="paper mt-6 rounded-3xl border border-border px-6 py-12 text-center sm:py-16">
-        <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm shadow-sm transition-colors hover:bg-primary/10">
-          <Sparkles className="h-4 w-4 text-primary" />
-          {totalCount > 0 ? (
-            <span className="text-muted-foreground">
-              <strong className="font-semibold text-foreground">{totalCount}+ novels</strong> recommended by readers
+        {totalCount > 0 ? (
+          <div className="mx-auto mb-8 flex flex-col items-center justify-center">
+            <div className="relative inline-flex items-start">
+              <span className="font-serif text-5xl font-bold leading-none tracking-tight text-primary sm:text-6xl">
+                {totalCount}+
+              </span>
+              <Sparkles className="absolute -right-6 -top-2 h-5 w-5 text-primary/50 sm:-right-8 sm:-top-3 sm:h-6 sm:w-6" />
+            </div>
+            <span className="mt-3 font-serif text-sm font-medium tracking-wide text-muted-foreground sm:text-base">
+              Novels recommended by readers
             </span>
-          ) : (
-            <span className="text-muted-foreground font-medium">A reading circle built by readers</span>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="mx-auto mb-8 flex items-center justify-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary/60" />
+            <span className="font-serif text-base text-muted-foreground">
+              A reading circle built by readers
+            </span>
+          </div>
+        )}
         <h1 className="mt-5 font-serif text-4xl leading-tight font-bold text-foreground sm:text-5xl">
           Read what readers actually loved.
         </h1>
