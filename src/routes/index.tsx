@@ -50,9 +50,9 @@ function Home() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 pb-4">
-      <section className="paper mt-6 rounded-3xl border border-border px-6 py-12 text-center sm:py-16">
+      <section className="paper mt-6 rounded-3xl border border-border px-6 py-8 text-center sm:py-12">
         {totalCount > 0 ? (
-          <div className="mx-auto mb-8 flex flex-col items-center justify-center">
+          <div className="mx-auto mb-5 flex flex-col items-center justify-center">
             <div className="relative inline-flex items-start">
               <span className="font-serif text-5xl font-bold leading-none tracking-tight text-primary sm:text-6xl">
                 {formatLargeNumber(totalCount)}+
@@ -64,20 +64,20 @@ function Home() {
             </span>
           </div>
         ) : (
-          <div className="mx-auto mb-8 flex items-center justify-center gap-2">
+          <div className="mx-auto mb-5 flex items-center justify-center gap-2">
             <Sparkles className="h-4 w-4 text-primary/60" />
             <span className="font-serif text-base text-muted-foreground">
               A reading circle built by readers
             </span>
           </div>
         )}
-        <h1 className="mt-5 font-serif text-4xl leading-tight font-bold text-foreground sm:text-5xl">
+        <h1 className="font-serif text-4xl leading-tight font-bold text-foreground sm:text-5xl">
           Read what readers actually loved.
         </h1>
-        <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
+        <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-muted-foreground">
           Discover the novels that stayed with people, see why they loved them, and share your own favourite.
         </p>
-        <div className="mt-7 flex flex-wrap justify-center gap-3">
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link
             to="/submit"
             className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
