@@ -173,7 +173,7 @@ function Submit() {
             to="/browse"
             className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
           >
-            Browse recommendations
+            See Recommendations
           </Link>
           <button
             onClick={() => {

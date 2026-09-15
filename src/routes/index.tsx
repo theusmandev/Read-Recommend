@@ -90,7 +90,7 @@ function Home() {
             to="/browse"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold transition-colors hover:bg-secondary"
           >
-            Browse recommendations
+            see recommendations
           </Link>
         </div>
       </section>
