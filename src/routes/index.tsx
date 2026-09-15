@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { fetchFeed, fetchLeaderboard, fetchAllGenreCounts, getVotedIds } from "@/lib/community";
 import { formatLargeNumber } from "@/lib/utils";
 import { RecommendationCard } from "@/components/RecommendationCard";
+import { useCountUp } from "@/hooks/use-count-up";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -47,6 +48,7 @@ function Home() {
     queryFn: fetchAllGenreCounts,
   });
   const totalCount = countsQuery.data?.["All"] ?? 0;
+  const animatedTotalCount = useCountUp(totalCount, 1500);
 
   return (
     <div className="mx-auto max-w-4xl px-4 pb-4">
@@ -55,7 +57,7 @@ function Home() {
           <div className="mx-auto mb-5 flex flex-col items-center justify-center">
             <div className="relative inline-flex items-start">
               <span className="font-serif text-5xl font-bold leading-none tracking-tight text-primary sm:text-6xl">
-                {formatLargeNumber(totalCount)}+
+                {formatLargeNumber(animatedTotalCount)}+
               </span>
               <Sparkles className="absolute -right-6 -top-2 h-5 w-5 text-primary/50 sm:-right-8 sm:-top-3 sm:h-6 sm:w-6" />
             </div>
