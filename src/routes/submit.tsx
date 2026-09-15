@@ -40,6 +40,32 @@ export const Route = createFileRoute("/submit")({
 
 const MAX_REASON = 300;
 
+type FieldErrors = {
+  title?: string;
+  author?: string;
+  reason?: string;
+  genre?: string;
+};
+
+type ModalFieldErrors = {
+  name?: string;
+  email?: string;
+};
+
+const fieldErrorClass =
+  "mt-1.5 w-full rounded-xl border bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-ring";
+const fieldErrorBorder = "border-red-500";
+const fieldNormalBorder = "border-input";
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return (
+    <p className="mt-1 text-sm text-red-500" role="alert">
+      {message}
+    </p>
+  );
+}
+
 function Submit() {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
@@ -50,6 +76,10 @@ function Submit() {
   const [genre, setGenre] = useState<Genre>("Social");
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
+
+  // Field-level validation errors
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [modalErrors, setModalErrors] = useState<ModalFieldErrors>({});
 
   // Identity state
   const [savedIdentity, setSavedIdentity] = useState<{ name: string; email: string } | null>(null);
@@ -85,6 +115,8 @@ function Submit() {
     setTitle(match.title);
     setAuthor(match.author_name);
     setMatches([]);
+    // Clear errors for fields that are now filled
+    setFieldErrors((prev) => ({ ...prev, title: undefined, author: undefined }));
   }
 
   function handleChangeIdentity() {
@@ -95,7 +127,26 @@ function Submit() {
       setModalName("");
       setModalEmail("");
     }
+    setModalErrors({});
     setIsModalOpen(true);
+  }
+
+  /** Validate all main form fields and return errors (empty object = valid). */
+  function validateForm(): FieldErrors {
+    const errors: FieldErrors = {};
+    if (!title.trim()) {
+      errors.title = "Please add the novel name.";
+    }
+    if (!author.trim() && !novelId) {
+      errors.author = "Please add the writer's name.";
+    }
+    if (!reason.trim()) {
+      errors.reason = "Please tell us why you recommend this novel.";
+    }
+    if (!genre) {
+      errors.genre = "Please select a genre.";
+    }
+    return errors;
   }
 
   async function performSubmit(name: string, email: string) {
@@ -120,8 +171,10 @@ function Submit() {
 
   async function onSubmitForm(event: React.FormEvent) {
     event.preventDefault();
-    if (!title.trim() || !reason.trim()) {
-      toast.error("Please add the novel name and why you recommend it.");
+
+    const errors = validateForm();
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
       return;
     }
     
@@ -138,14 +191,21 @@ function Submit() {
     const name = modalName.trim();
     const email = modalEmail.trim().toLowerCase();
 
-    if (!name || !email) {
-      toast.error("Name and email are required.");
-      return;
+    const errors: ModalFieldErrors = {};
+    if (!name) {
+      errors.name = "Please enter your name.";
+    }
+    if (!email) {
+      errors.email = "Please enter your email address.";
+    } else {
+      const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+      if (!emailRegex.test(email)) {
+        errors.email = "Please enter a valid email address.";
+      }
     }
 
-    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-    if (!emailRegex.test(email)) {
-      toast.error("Please enter a valid email address.");
+    setModalErrors(errors);
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
@@ -157,6 +217,50 @@ function Submit() {
     
     // Proceed with submission immediately
     await performSubmit(name, email);
+  }
+
+  // --- Clear individual field errors on change ---
+  function handleTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setTitle(event.target.value);
+    setNovelId(null);
+    if (fieldErrors.title) {
+      setFieldErrors((prev) => ({ ...prev, title: undefined }));
+    }
+  }
+
+  function handleAuthorChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setAuthor(event.target.value);
+    if (fieldErrors.author) {
+      setFieldErrors((prev) => ({ ...prev, author: undefined }));
+    }
+  }
+
+  function handleReasonChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    setReason(event.target.value);
+    if (fieldErrors.reason) {
+      setFieldErrors((prev) => ({ ...prev, reason: undefined }));
+    }
+  }
+
+  function handleGenreChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    setGenre(event.target.value as Genre);
+    if (fieldErrors.genre) {
+      setFieldErrors((prev) => ({ ...prev, genre: undefined }));
+    }
+  }
+
+  function handleModalNameChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setModalName(event.target.value);
+    if (modalErrors.name) {
+      setModalErrors((prev) => ({ ...prev, name: undefined }));
+    }
+  }
+
+  function handleModalEmailChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setModalEmail(event.target.value);
+    if (modalErrors.email) {
+      setModalErrors((prev) => ({ ...prev, email: undefined }));
+    }
   }
 
   if (done) {
@@ -182,6 +286,7 @@ function Submit() {
               setAuthor("");
               setNovelId(null);
               setReason("");
+              setFieldErrors({});
             }}
             className="rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold hover:bg-secondary"
           >
@@ -199,7 +304,8 @@ function Submit() {
         Tell us the novel and why it deserves a place on someone's shelf.
       </p>
 
-      <form onSubmit={onSubmitForm} className="mt-6 space-y-5 rounded-3xl border border-border bg-card p-6">
+      <form onSubmit={onSubmitForm} className="mt-6 space-y-5 rounded-3xl border border-border bg-card p-6" noValidate>
+        {/* Novel title */}
         <div className="relative">
           <label className="block text-sm font-medium" htmlFor="title">
             Novel title
@@ -207,14 +313,13 @@ function Submit() {
           <input
             id="title"
             value={title}
-            onChange={(event) => {
-              setTitle(event.target.value);
-              setNovelId(null);
-            }}
+            onChange={handleTitleChange}
             placeholder="e.g. Jannat Kay Pattay"
-            className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-ring"
+            className={`${fieldErrorClass} ${fieldErrors.title ? fieldErrorBorder : fieldNormalBorder}`}
             autoComplete="off"
             dir="auto"
+            aria-invalid={!!fieldErrors.title}
+            aria-describedby={fieldErrors.title ? "title-error" : undefined}
           />
           {matches.length > 0 ? (
             <ul className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-border bg-popover shadow-lg">
@@ -242,8 +347,10 @@ function Submit() {
               Linked to an existing novel in the library.
             </p>
           ) : null}
+          <FieldError message={fieldErrors.title} />
         </div>
 
+        {/* Writer's name */}
         <div>
           <label className="block text-sm font-medium" htmlFor="author">
             Writer's name
@@ -251,14 +358,18 @@ function Submit() {
           <input
             id="author"
             value={author}
-            onChange={(event) => setAuthor(event.target.value)}
+            onChange={handleAuthorChange}
             placeholder="e.g. Nimra Ahmed"
             disabled={Boolean(novelId)}
-            className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
+            className={`${fieldErrorClass} disabled:opacity-60 ${fieldErrors.author ? fieldErrorBorder : fieldNormalBorder}`}
             dir="auto"
+            aria-invalid={!!fieldErrors.author}
+            aria-describedby={fieldErrors.author ? "author-error" : undefined}
           />
+          <FieldError message={fieldErrors.author} />
         </div>
 
+        {/* Genre */}
         <div>
           <label className="block text-sm font-medium" htmlFor="genre">
             Genre
@@ -266,8 +377,10 @@ function Submit() {
           <select
             id="genre"
             value={genre}
-            onChange={(event) => setGenre(event.target.value as Genre)}
-            className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-ring"
+            onChange={handleGenreChange}
+            className={`${fieldErrorClass} ${fieldErrors.genre ? fieldErrorBorder : fieldNormalBorder}`}
+            aria-invalid={!!fieldErrors.genre}
+            aria-describedby={fieldErrors.genre ? "genre-error" : undefined}
           >
             {GENRES.map((option) => (
               <option key={option} value={option}>
@@ -275,8 +388,10 @@ function Submit() {
               </option>
             ))}
           </select>
+          <FieldError message={fieldErrors.genre} />
         </div>
 
+        {/* Reason */}
         <div>
           <label className="block text-sm font-medium" htmlFor="reason">
             Why do you recommend it?
@@ -286,14 +401,19 @@ function Submit() {
             value={reason}
             maxLength={MAX_REASON}
             rows={4}
-            onChange={(event) => setReason(event.target.value)}
+            onChange={handleReasonChange}
             placeholder="What made this novel special for you?"
-            className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-base leading-relaxed outline-none focus:ring-2 focus:ring-ring"
+            className={`${fieldErrorClass} leading-relaxed ${fieldErrors.reason ? fieldErrorBorder : fieldNormalBorder}`}
             dir="auto"
+            aria-invalid={!!fieldErrors.reason}
+            aria-describedby={fieldErrors.reason ? "reason-error" : undefined}
           />
-          <p className="mt-1 text-right text-xs text-muted-foreground">
-            {reason.length}/{MAX_REASON}
-          </p>
+          <div className="mt-1 flex items-start justify-between gap-2">
+            <FieldError message={fieldErrors.reason} />
+            <p className="shrink-0 text-right text-xs text-muted-foreground">
+              {reason.length}/{MAX_REASON}
+            </p>
+          </div>
         </div>
 
         {savedIdentity && (
@@ -334,7 +454,7 @@ function Submit() {
               We'd love to know who is recommending this novel. We'll save this on your device so you don't have to enter it again.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={onModalSubmit} className="mt-4 space-y-4">
+          <form onSubmit={onModalSubmit} className="mt-4 space-y-4" noValidate>
             <div>
               <label className="block text-sm font-medium" htmlFor="modalName">
                 Your name
@@ -342,12 +462,13 @@ function Submit() {
               <input
                 id="modalName"
                 value={modalName}
-                onChange={(event) => setModalName(event.target.value)}
+                onChange={handleModalNameChange}
                 placeholder="e.g. Ayesha"
-                required
-                className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-ring"
+                className={`${fieldErrorClass} ${modalErrors.name ? fieldErrorBorder : fieldNormalBorder}`}
                 dir="auto"
+                aria-invalid={!!modalErrors.name}
               />
+              <FieldError message={modalErrors.name} />
             </div>
             <div>
               <label className="block text-sm font-medium" htmlFor="modalEmail">
@@ -357,11 +478,12 @@ function Submit() {
                 id="modalEmail"
                 type="email"
                 value={modalEmail}
-                onChange={(event) => setModalEmail(event.target.value)}
+                onChange={handleModalEmailChange}
                 placeholder="you@example.com"
-                required
-                className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-ring"
+                className={`${fieldErrorClass} ${modalErrors.email ? fieldErrorBorder : fieldNormalBorder}`}
+                aria-invalid={!!modalErrors.email}
               />
+              <FieldError message={modalErrors.email} />
               <p className="mt-1 text-xs text-muted-foreground">
                 Your email is kept private and never shown publicly.
               </p>
