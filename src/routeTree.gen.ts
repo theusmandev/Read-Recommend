@@ -15,6 +15,7 @@ import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as MyRecommendationsRouteImport } from './routes/my-recommendations'
 import { Route as SubmitRouteImport } from './routes/submit'
+import { Route as ReaderReaderIdRouteImport } from './routes/reader.$readerId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +47,11 @@ const SubmitRoute = SubmitRouteImport.update({
   path: '/submit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReaderReaderIdRoute = ReaderReaderIdRouteImport.update({
+  id: '/reader/$readerId',
+  path: '/reader/$readerId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/leaderboard': typeof LeaderboardRoute
   '/my-recommendations': typeof MyRecommendationsRoute
   '/submit': typeof SubmitRoute
+  '/reader/$readerId': typeof ReaderReaderIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/leaderboard': typeof LeaderboardRoute
   '/my-recommendations': typeof MyRecommendationsRoute
   '/submit': typeof SubmitRoute
+  '/reader/$readerId': typeof ReaderReaderIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +79,7 @@ export interface FileRoutesById {
   '/leaderboard': typeof LeaderboardRoute
   '/my-recommendations': typeof MyRecommendationsRoute
   '/submit': typeof SubmitRoute
+  '/reader/$readerId': typeof ReaderReaderIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +90,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/my-recommendations'
     | '/submit'
+    | '/reader/$readerId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/my-recommendations'
     | '/submit'
+    | '/reader/$readerId'
   id:
     | '__root__'
     | '/'
@@ -97,6 +108,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/my-recommendations'
     | '/submit'
+    | '/reader/$readerId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,6 +118,7 @@ export interface RootRouteChildren {
   LeaderboardRoute: typeof LeaderboardRoute
   MyRecommendationsRoute: typeof MyRecommendationsRoute
   SubmitRoute: typeof SubmitRoute
+  ReaderReaderIdRoute: typeof ReaderReaderIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -152,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubmitRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reader/$readerId': {
+      id: '/reader/$readerId'
+      path: '/reader/$readerId'
+      fullPath: '/reader/$readerId'
+      preLoaderRoute: typeof ReaderReaderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -162,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   LeaderboardRoute: LeaderboardRoute,
   MyRecommendationsRoute: MyRecommendationsRoute,
   SubmitRoute: SubmitRoute,
+  ReaderReaderIdRoute: ReaderReaderIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

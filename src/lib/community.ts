@@ -233,6 +233,24 @@ export async function deleteMyRecommendation(recommendationId: string, readerId:
   if (error) throw error;
 }
 
+export async function fetchReaderProfile(readerId: string) {
+  const { data: recommendations, error } = await supabase
+    .from("recommendations")
+    .select("id, reader_name, reason, genre, helpful_count, created_at, novels(id, title, author_name)")
+    .eq("status", "approved")
+    .eq("reader_id", readerId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  const readerName = recommendations?.[0]?.reader_name || "Unknown Reader";
+
+  return {
+    readerName,
+    recommendations: (recommendations ?? []) as unknown as FeedItem[],
+  };
+}
+
 export async function getReaderId(name: string, email: string): Promise<string> {
   const { data: readerId, error } = await supabase.rpc("upsert_reader", {
     p_name: name.trim(),

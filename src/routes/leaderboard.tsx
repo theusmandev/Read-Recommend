@@ -207,9 +207,13 @@ function Leaderboard() {
                     )}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-serif text-lg leading-snug font-semibold break-words">
+                    <Link
+                      to="/reader/$readerId"
+                      params={{ readerId: reader.reader_id }}
+                      className="font-serif text-lg leading-snug font-semibold break-words hover:underline hover:text-primary transition-colors"
+                    >
                       {reader.reader_name}
-                    </h3>
+                    </Link>
                   </div>
                   <div className="text-right text-sm">
                     <p className="font-semibold text-primary">
