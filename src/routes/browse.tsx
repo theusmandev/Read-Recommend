@@ -60,6 +60,30 @@ function Browse() {
 
   const allItems = feed.data?.pages.flat() ?? [];
 
+  // Build JSON-LD structured data from the fetched recommendations
+  const jsonLd = allItems.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Urdu Novel Recommendations by Readers",
+    "description": "Community-driven recommendations of the best Urdu novels, curated by readers.",
+    "url": "https://readers.urdunovelbanks.com/browse",
+    "numberOfItems": allItems.length,
+    "itemListElement": allItems.map((item, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "Book",
+        "name": item.novels?.title ?? "Unknown",
+        "author": {
+          "@type": "Person",
+          "name": item.novels?.author_name ?? "Unknown",
+        },
+        "inLanguage": "ur",
+        "genre": item.genre,
+      },
+    })),
+  } : null;
+
   async function handleVote(id: string) {
     try {
       const { isVoted, newCount } = await toggleVoteHelpful(id);
@@ -95,6 +119,14 @@ function Browse() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
+      {/* JSON-LD structured data */}
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+
       <h1 className="font-serif text-2xl font-bold sm:text-3xl flex items-center gap-2 flex-wrap">
         {genre === "All" ? "All recommendations" : `${genre} recommendations`}
       </h1>
@@ -187,3 +219,4 @@ function Browse() {
     </div>
   );
 }
+
