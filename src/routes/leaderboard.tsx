@@ -59,8 +59,8 @@ function Leaderboard() {
   });
 
   const readersQuery = useQuery({
-    queryKey: ["top-readers"],
-    queryFn: () => fetchTopReaders(20),
+    queryKey: ["top-readers", period],
+    queryFn: () => fetchTopReaders(period, 20),
     enabled: view === "readers",
   });
 
@@ -95,24 +95,22 @@ function Leaderboard() {
             ))}
           </div>
 
-          {view === "novels" && (
-            <div className="inline-flex rounded-full border border-border bg-card p-1">
-              {periods.map((option) => (
-                <button
-                  key={option.key}
-                  onClick={() => setPeriod(option.key)}
-                  className={cn(
-                    "rounded-full px-4 py-1.5 text-xs transition-colors",
-                    period === option.key
-                      ? "bg-secondary text-secondary-foreground font-semibold"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="inline-flex rounded-full border border-border bg-card p-1">
+            {periods.map((option) => (
+              <button
+                key={option.key}
+                onClick={() => setPeriod(option.key)}
+                className={cn(
+                  "rounded-full px-4 py-1.5 text-xs transition-colors",
+                  period === option.key
+                    ? "bg-secondary text-secondary-foreground font-semibold"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

@@ -115,8 +115,8 @@ export type TopReader = {
   approved_count: number;
 };
 
-export async function fetchTopReaders(limit: number = 20): Promise<TopReader[]> {
-  const { data, error } = await supabase.rpc("get_top_readers", { p_limit: limit });
+export async function fetchTopReaders(period: "all" | "month" | "week" = "all", limit: number = 20): Promise<TopReader[]> {
+  const { data, error } = await supabase.rpc("get_top_readers", { p_period: period, p_limit: limit });
   if (error) throw error;
   return (data ?? []) as TopReader[];
 }
