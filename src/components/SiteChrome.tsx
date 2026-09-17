@@ -131,7 +131,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3">
         <Link to="/" className="flex min-w-0 items-center gap-2">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <BookHeart className="h-5 w-5" />
+            <BookHeart className="h-5 w-5" aria-hidden="true" />
           </span>
           <span className="flex flex-col leading-none">
             <span className="font-serif text-[15px] font-semibold tracking-tight sm:text-base">Readers&apos;</span>
@@ -160,7 +160,7 @@ export function SiteHeader() {
             className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 whitespace-nowrap text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           >
             {externalNavItem.label}
-            <ExternalLink className="h-3 w-3 opacity-50" />
+            <ExternalLink className="h-3 w-3 opacity-50" aria-hidden="true" />
           </a>
         </nav>
 
@@ -169,14 +169,14 @@ export function SiteHeader() {
           <Sheet>
             <SheetTrigger asChild>
               <button className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-card text-foreground transition-colors hover:bg-secondary">
-                <Menu className="h-5 w-5" />
+                <Menu className="h-5 w-5" aria-hidden="true" />
                 <span className="sr-only">Open menu</span>
               </button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[85vw] max-w-sm sm:w-[350px]">
               <SheetHeader className="text-left">
                 <SheetTitle className="flex items-center gap-2">
-                  <BookHeart className="h-5 w-5 text-primary" />
+                  <BookHeart className="h-5 w-5 text-primary" aria-hidden="true" />
                   <span className="flex flex-col leading-none">
                     <span className="font-serif text-xl font-semibold">Readers&apos;</span>
                     <span className="text-xs tracking-wide text-muted-foreground">Suggestion Library</span>
@@ -203,7 +203,7 @@ export function SiteHeader() {
                     className="flex items-center gap-2 rounded-lg px-4 py-3 text-base font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                   >
                     {externalNavItem.label}
-                    <ExternalLink className="h-3.5 w-3.5 opacity-50" />
+                    <ExternalLink className="h-3.5 w-3.5 opacity-50" aria-hidden="true" />
                   </a>
                 </SheetClose>
               </nav>
@@ -259,6 +259,7 @@ export function SiteFooter() {
           Urdu Fiction Bank
         </a>
       </div>
+
     </footer>
   );
 }
