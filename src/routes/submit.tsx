@@ -20,19 +20,25 @@ import {
 export const Route = createFileRoute("/submit")({
   head: () => ({
     meta: [
-      { title: "Recommend an Urdu Novel | Readers' Suggestion Library" },
+      { title: "Recommend Your Favourite Urdu Novel | Readers' Suggestion Library" },
       {
         name: "description",
         content:
-          "Share an Urdu novel you loved and tell fellow readers why. No sign-up needed — just the novel, the writer and your reason.",
+          "Share your favourite Urdu novel with the readers' community — no sign-up needed. Tell fellow readers the novel name, author, and why you loved it.",
       },
-      { property: "og:title", content: "Recommend an Urdu Novel" },
+      { property: "og:title", content: "Recommend Your Favourite Urdu Novel" },
       {
         property: "og:description",
-        content: "Add your favourite Urdu novel to the community shelf in under a minute.",
+        content: "Share your favourite Urdu novel with the community. No sign-up needed — just the novel, the author, and your reason.",
       },
+      { property: "og:url", content: "https://readers.urdunovelbanks.com/submit" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Recommend Your Favourite Urdu Novel" },
+      { name: "twitter:description", content: "Share your favourite Urdu novel with fellow readers. No sign-up needed." },
+    ],
+    links: [
+      { rel: "canonical", href: "https://readers.urdunovelbanks.com/submit" },
     ],
   }),
   component: Submit,

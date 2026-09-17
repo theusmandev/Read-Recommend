@@ -10,19 +10,25 @@ import { useCountUp } from "@/hooks/use-count-up";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Readers' Suggestion Library — Readers Recommend Urdu Novels" },
+      { title: "Best Urdu Novel Recommendations by Readers | Readers' Suggestion Library" },
       {
         name: "description",
         content:
-          "Discover the novels that stayed with people, see why they loved them, and share your own favourite.",
+          "Discover the best Urdu novels recommended by real readers. Browse community-driven Urdu fiction suggestions, share your favourites, and find your next great read.",
       },
-      { property: "og:title", content: "Readers' Suggestion Library — Readers Recommend Urdu Novels" },
+      { property: "og:title", content: "Best Urdu Novel Recommendations by Readers | Readers' Suggestion Library" },
       {
         property: "og:description",
-        content: "Discover the novels that stayed with people, see why they loved them, and share your own favourite.",
+        content: "Discover the best Urdu novels recommended by real readers. Browse community-driven Urdu fiction suggestions and find your next great read.",
       },
+      { property: "og:url", content: "https://readers.urdunovelbanks.com/" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Best Urdu Novel Recommendations by Readers" },
+      { name: "twitter:description", content: "A readers' community for discovering and recommending the best Urdu fiction." },
+    ],
+    links: [
+      { rel: "canonical", href: "https://readers.urdunovelbanks.com/" },
     ],
   }),
   component: Home,

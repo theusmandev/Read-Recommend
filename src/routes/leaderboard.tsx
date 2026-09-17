@@ -8,19 +8,25 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/leaderboard")({
   head: () => ({
     meta: [
-      { title: "Readers' Choice — Top Urdu Novels | Readers' Suggestion Library" },
+      { title: "Top Urdu Novels — Most Recommended by Readers | Readers' Suggestion Library" },
       {
         name: "description",
         content:
-          "The most-recommended Urdu novels chosen by the community, ranked for all time, this month and this week.",
+          "See the most-recommended Urdu novels ranked by the readers' community. Explore all-time favourites, trending picks this month, and this week's top Urdu fiction choices.",
       },
-      { property: "og:title", content: "Readers' Choice — Top Urdu Novels" },
+      { property: "og:title", content: "Top Urdu Novels — Most Recommended by Readers" },
       {
         property: "og:description",
-        content: "See which Urdu novels the community recommends most.",
+        content: "The most-recommended Urdu novels ranked by readers. Discover all-time favourites and trending Urdu fiction picks.",
       },
+      { property: "og:url", content: "https://readers.urdunovelbanks.com/leaderboard" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Top Urdu Novels — Most Recommended by Readers" },
+      { name: "twitter:description", content: "The most-recommended Urdu novels ranked by the community. Discover all-time favourites and trending picks." },
+    ],
+    links: [
+      { rel: "canonical", href: "https://readers.urdunovelbanks.com/leaderboard" },
     ],
   }),
   component: Leaderboard,

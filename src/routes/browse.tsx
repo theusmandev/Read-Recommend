@@ -9,19 +9,25 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/browse")({
   head: () => ({
     meta: [
-      { title: "Browse Urdu Novel Recommendations | Readers' Suggestion Library" },
+      { title: "Browse Urdu Novels by Genre — Reader Recommendations | Readers' Suggestion Library" },
       {
         name: "description",
         content:
-          "Read every approved recommendation from the community — filter by genre, sort by newest or most helpful.",
+          "Explore Urdu novel recommendations sorted by genre — romantic, social, mystery, historical and more. Filter community picks, read why readers loved each novel, and discover new Urdu fiction.",
       },
-      { property: "og:title", content: "Browse Urdu Novel Recommendations" },
+      { property: "og:title", content: "Browse Urdu Novels by Genre — Reader Recommendations" },
       {
         property: "og:description",
-        content: "Filter Urdu novel recommendations by genre and find your next read.",
+        content: "Explore Urdu novel recommendations by genre. Filter community picks and discover your next favourite Urdu fiction read.",
       },
+      { property: "og:url", content: "https://readers.urdunovelbanks.com/browse" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Browse Urdu Novels by Genre — Reader Recommendations" },
+      { name: "twitter:description", content: "Explore Urdu novel recommendations by genre and discover your next favourite read." },
+    ],
+    links: [
+      { rel: "canonical", href: "https://readers.urdunovelbanks.com/browse" },
     ],
   }),
   component: Browse,
