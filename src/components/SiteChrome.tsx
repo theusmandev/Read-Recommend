@@ -236,7 +236,7 @@ export function SiteFooter() {
       </div>
 
       {/* Website links */}
-      <div className="mt-4 flex flex-col items-center gap-1.5 sm:flex-row sm:justify-center sm:gap-4">
+      <div className="mt-4 flex items-center justify-center gap-2 text-xs sm:text-sm sm:gap-4">
         <a
           href="https://www.urdunovelbanks.com/"
           target="_blank"
@@ -245,7 +245,7 @@ export function SiteFooter() {
         >
           Urdu Novel Bank
         </a>
-        <span className="hidden text-border sm:inline" aria-hidden="true">·</span>
+        <span className="text-border" aria-hidden="true">·</span>
         <a
           href="https://urdufictionbank.com/"
           target="_blank"
