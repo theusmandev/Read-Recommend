@@ -10,7 +10,7 @@ export const Route = createFileRoute("/admin")({
     meta: [
       { title: "Moderation | Readers' Suggestion Library" },
       { name: "description", content: "Private moderation page for the Readers' Suggestion Library admin." },
-      { name: "robots", content: "noindex" },
+      { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "Moderation | Readers' Suggestion Library" },
       { property: "og:description", content: "Private moderation page." },
       { property: "og:type", content: "website" },

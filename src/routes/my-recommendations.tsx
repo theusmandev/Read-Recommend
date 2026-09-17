@@ -23,6 +23,7 @@ export const Route = createFileRoute("/my-recommendations")({
     meta: [
       { title: "My Recommendations | Readers' Suggestion Library" },
       { name: "description", content: "View and manage your recommended Urdu novels." },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: MyRecommendations,
