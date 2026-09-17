@@ -139,6 +139,7 @@ function MyRecommendations() {
         </div>
       ) : (
         <section className="mt-8">
+          <h2 className="sr-only">Your submitted recommendations</h2>
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Loading your recommendations…</p>
           ) : recommendations && recommendations.length > 0 ? (

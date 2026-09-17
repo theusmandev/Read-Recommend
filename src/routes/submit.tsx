@@ -9,6 +9,7 @@ import {
   type Genre,
   type NovelMatch,
 } from "@/lib/community";
+import { getLangAttr } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -272,7 +273,7 @@ function Submit() {
   if (done) {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <CheckCircle2 className="mx-auto h-12 w-12 text-primary" />
+        <CheckCircle2 className="mx-auto h-12 w-12 text-primary" aria-hidden="true" />
         <h1 className="mt-4 font-serif text-2xl font-bold">Jazak Allah — thank you!</h1>
         <p className="mt-3 text-muted-foreground">
           Your recommendation has been sent for a quick review. Once approved it will appear in the
@@ -339,9 +340,21 @@ function Submit() {
                     onClick={() => chooseMatch(match)}
                     className="w-full px-3 py-2 text-left text-sm hover:bg-secondary"
                   >
-                    <span className="font-medium" dir="auto">{match.title}</span>
+                    <span
+                      className="font-medium"
+                      dir="auto"
+                      lang={getLangAttr(match.title)}
+                    >
+                      {match.title}
+                    </span>
                     {match.author_name ? (
-                      <span className="text-muted-foreground" dir="auto"> — {match.author_name}</span>
+                      <span
+                        className="text-muted-foreground"
+                        dir="auto"
+                        lang={getLangAttr(match.author_name)}
+                      >
+                        {" "}— {match.author_name}
+                      </span>
                     ) : null}
                   </button>
                 </li>
@@ -425,7 +438,7 @@ function Submit() {
         {savedIdentity && (
           <div className="flex items-center justify-between rounded-xl bg-secondary/50 px-4 py-3 text-sm">
             <div className="flex items-center gap-2">
-              <UserCircle2 className="h-4 w-4 text-muted-foreground" />
+              <UserCircle2 className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               <span dir="auto">
                 Recommending as: <strong className="font-medium">{savedIdentity.name}</strong>
               </span>

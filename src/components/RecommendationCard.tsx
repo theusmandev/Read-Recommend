@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ThumbsUp } from "lucide-react";
 import type { FeedItem } from "@/lib/community";
-import { cn } from "@/lib/utils";
+import { cn, getLangAttr } from "@/lib/utils";
 
 export function RecommendationCard({
   item,
@@ -30,11 +30,21 @@ export function RecommendationCard({
     <article className="rounded-2xl border border-border bg-card p-5 shadow-[0_1px_0_0_var(--color-border)] transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="font-serif text-lg leading-snug font-semibold text-foreground break-words" dir="auto">
+          <h3
+            className="font-serif text-lg leading-snug font-semibold text-foreground break-words"
+            dir="auto"
+            lang={getLangAttr(item.novels?.title)}
+          >
             {item.novels?.title}
           </h3>
           {item.novels?.author_name ? (
-            <p className="mt-0.5 text-sm text-muted-foreground break-words" dir="auto">by {item.novels.author_name}</p>
+            <p
+              className="mt-0.5 text-sm text-muted-foreground break-words"
+              dir="auto"
+              lang={getLangAttr(item.novels.author_name)}
+            >
+              by {item.novels.author_name}
+            </p>
           ) : null}
         </div>
         <div className="flex flex-col items-end gap-2 shrink-0">
@@ -54,10 +64,20 @@ export function RecommendationCard({
         </div>
       </div>
 
-      <p className="mt-3 text-[0.975rem] leading-relaxed text-foreground/90" dir="auto">{item.reason}</p>
+      <p
+        className="mt-3 text-[0.975rem] leading-relaxed text-foreground/90"
+        dir="auto"
+        lang={getLangAttr(item.reason)}
+      >
+        {item.reason}
+      </p>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border/70 pt-3">
-        <span className="text-sm text-muted-foreground truncate flex-1 min-w-0" dir="auto">
+        <span
+          className="text-sm text-muted-foreground truncate flex-1 min-w-0"
+          dir="auto"
+          lang={getLangAttr(item.reader_name)}
+        >
           — {item.reader_name?.trim() ? item.reader_name : "A reader"}
         </span>
         <div className="flex items-center gap-2">
@@ -83,7 +103,7 @@ export function RecommendationCard({
             )}
             aria-label="Mark this recommendation as helpful"
           >
-            <ThumbsUp className={cn("h-4 w-4", voted && "fill-current")} />
+            <ThumbsUp className={cn("h-4 w-4", voted && "fill-current")} aria-hidden="true" />
             {item.helpful_count} found this helpful
           </button>
         </div>

@@ -174,6 +174,8 @@ function Browse() {
         </div>
       </div>
 
+      <h2 className="sr-only">Recommended novels</h2>
+
       <div className="mt-6 grid gap-4">
         {feed.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading recommendations…</p>

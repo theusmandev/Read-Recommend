@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PenLine, Sparkles, Trophy } from "lucide-react";
 import { useState, useEffect } from "react";
 import { fetchFeed, fetchLeaderboard, fetchAllGenreCounts, getVotedIds } from "@/lib/community";
-import { formatLargeNumber } from "@/lib/utils";
+import { formatLargeNumber, getLangAttr } from "@/lib/utils";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import { useCountUp } from "@/hooks/use-count-up";
 
@@ -65,7 +65,7 @@ function Home() {
               <span className="font-serif text-5xl font-bold leading-none tracking-tight text-primary sm:text-6xl">
                 {formatLargeNumber(animatedTotalCount)}+
               </span>
-              <Sparkles className="absolute -right-6 -top-2 h-5 w-5 text-primary/50 sm:-right-8 sm:-top-3 sm:h-6 sm:w-6" />
+              <Sparkles className="absolute -right-6 -top-2 h-5 w-5 text-primary/50 sm:-right-8 sm:-top-3 sm:h-6 sm:w-6" aria-hidden="true" />
             </div>
             <span className="mt-3 font-serif text-sm font-medium tracking-wide text-muted-foreground sm:text-base">
               Novels recommended by readers
@@ -73,7 +73,7 @@ function Home() {
           </div>
         ) : (
           <div className="mx-auto mb-5 flex items-center justify-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary/60" />
+            <Sparkles className="h-4 w-4 text-primary/60" aria-hidden="true" />
             <span className="font-serif text-base text-muted-foreground">
               A reading circle built by readers
             </span>
@@ -90,7 +90,7 @@ function Home() {
             to="/submit"
             className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
           >
-            <PenLine className="h-4 w-4" /> Recommend a Novel
+            <PenLine className="h-4 w-4" aria-hidden="true" /> Recommend a Novel
           </Link>
           <Link
             to="/browse"
@@ -122,7 +122,7 @@ function Home() {
       <section className="mt-12">
         <div className="flex items-baseline justify-between">
           <h2 className="flex items-center gap-2 font-serif text-xl font-semibold">
-            <Trophy className="h-5 w-5 text-gold" /> Readers' Choice
+            <Trophy className="h-5 w-5 text-gold" aria-hidden="true" /> Readers' Choice
           </h2>
           <Link
             to="/leaderboard"
@@ -138,8 +138,20 @@ function Home() {
                 {index + 1}
               </span>
               <span className="flex-1 min-w-0">
-                <span className="block font-medium break-words" dir="auto">{row.title}</span>
-                <span className="block text-sm text-muted-foreground break-words" dir="auto">{row.author_name}</span>
+                <span
+                  className="block font-medium break-words"
+                  dir="auto"
+                  lang={getLangAttr(row.title)}
+                >
+                  {row.title}
+                </span>
+                <span
+                  className="block text-sm text-muted-foreground break-words"
+                  dir="auto"
+                  lang={getLangAttr(row.author_name)}
+                >
+                  {row.author_name}
+                </span>
               </span>
               <span className="shrink-0 text-sm text-muted-foreground">{row.helpful_total} 👍</span>
             </li>

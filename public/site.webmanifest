@@ -1,0 +1,17 @@
+{
+  "name": "Readers' Suggestion Library",
+  "short_name": "Readers' Library",
+  "description": "A readers' community for Urdu novel recommendations. Discover top Urdu fiction and share your favourite novels.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf7f2",
+  "theme_color": "#4a2634",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
