@@ -109,6 +109,18 @@ export async function fetchLeaderboard(
   return (data ?? []) as LeaderRow[];
 }
 
+export type TopReader = {
+  reader_id: string;
+  reader_name: string;
+  approved_count: number;
+};
+
+export async function fetchTopReaders(limit: number = 20): Promise<TopReader[]> {
+  const { data, error } = await supabase.rpc("get_top_readers", { p_limit: limit });
+  if (error) throw error;
+  return (data ?? []) as TopReader[];
+}
+
 export type NovelMatch = { id: string; title: string; author_name: string; score: number };
 
 /** Fuzzy title lookup so the same novel is not created twice under different spellings. */
