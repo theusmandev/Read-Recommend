@@ -133,8 +133,9 @@ export function SiteHeader() {
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <BookHeart className="h-5 w-5" />
           </span>
-          <span className="truncate text-[15px] font-semibold tracking-tight sm:text-lg">
-            Urdu Novel Bank
+          <span className="flex flex-col leading-none">
+            <span className="font-serif text-[15px] font-semibold tracking-tight sm:text-base">Readers&apos;</span>
+            <span className="text-[10px] tracking-wide text-muted-foreground sm:text-[11px]">Suggestion Library</span>
           </span>
         </Link>
         
@@ -174,9 +175,12 @@ export function SiteHeader() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[85vw] max-w-sm sm:w-[350px]">
               <SheetHeader className="text-left">
-                <SheetTitle className="flex items-center gap-2 font-serif text-xl">
+                <SheetTitle className="flex items-center gap-2">
                   <BookHeart className="h-5 w-5 text-primary" />
-                  Urdu Novel Bank
+                  <span className="flex flex-col leading-none">
+                    <span className="font-serif text-xl font-semibold">Readers&apos;</span>
+                    <span className="text-xs tracking-wide text-muted-foreground">Suggestion Library</span>
+                  </span>
                 </SheetTitle>
               </SheetHeader>
               <nav className="mt-8 flex flex-col gap-2">

@@ -21,7 +21,7 @@ import {
 export const Route = createFileRoute("/my-recommendations")({
   head: () => ({
     meta: [
-      { title: "My Recommendations | Urdu Novel Bank" },
+      { title: "My Recommendations | Readers' Suggestion Library" },
       { name: "description", content: "View and manage your recommended Urdu novels." },
     ],
   }),

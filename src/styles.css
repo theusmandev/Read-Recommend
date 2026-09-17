@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Warm "cozy reading room" design system for the Urdu Novel Bank.
+ * Warm "cozy reading room" design system for Readers' Suggestion Library.
  * Paper-cream surfaces, ink-brown text, deep plum primary, saffron accent.
  * All colours are oklch semantic tokens — never hardcode colours in components.
  */

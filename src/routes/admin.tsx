@@ -8,10 +8,10 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Moderation | Urdu Novel Bank" },
-      { name: "description", content: "Private moderation page for the Urdu Novel Bank admin." },
+      { title: "Moderation | Readers' Suggestion Library" },
+      { name: "description", content: "Private moderation page for the Readers' Suggestion Library admin." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Moderation | Urdu Novel Bank" },
+      { property: "og:title", content: "Moderation | Readers' Suggestion Library" },
       { property: "og:description", content: "Private moderation page." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

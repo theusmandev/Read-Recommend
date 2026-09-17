@@ -20,7 +20,7 @@ import {
 export const Route = createFileRoute("/submit")({
   head: () => ({
     meta: [
-      { title: "Recommend an Urdu Novel | Urdu Novel Bank" },
+      { title: "Recommend an Urdu Novel | Readers' Suggestion Library" },
       {
         name: "description",
         content:

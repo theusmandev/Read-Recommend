@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/browse")({
   head: () => ({
     meta: [
-      { title: "Browse Urdu Novel Recommendations | Urdu Novel Bank" },
+      { title: "Browse Urdu Novel Recommendations | Readers' Suggestion Library" },
       {
         name: "description",
         content:

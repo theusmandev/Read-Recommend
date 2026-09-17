@@ -10,13 +10,13 @@ import { useCountUp } from "@/hooks/use-count-up";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Urdu Novel Bank — Readers Recommend Urdu Novels" },
+      { title: "Readers' Suggestion Library — Readers Recommend Urdu Novels" },
       {
         name: "description",
         content:
           "Discover the novels that stayed with people, see why they loved them, and share your own favourite.",
       },
-      { property: "og:title", content: "Urdu Novel Bank — Readers Recommend Urdu Novels" },
+      { property: "og:title", content: "Readers' Suggestion Library — Readers Recommend Urdu Novels" },
       {
         property: "og:description",
         content: "Discover the novels that stayed with people, see why they loved them, and share your own favourite.",
