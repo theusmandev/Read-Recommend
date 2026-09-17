@@ -40,7 +40,7 @@ const periods = [
 
 const views = [
   { key: "novels", label: "Top Novels" },
-  { key: "readers", label: "Top Readers" },
+  { key: "readers", label: "Top 20 Readers" },
 ] as const;
 
 const medals = ["🥇", "🥈", "🥉"];
