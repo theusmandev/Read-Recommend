@@ -125,6 +125,8 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+import { BackToTop } from "../components/BackToTop";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -139,6 +141,7 @@ function RootComponent() {
         <SiteFooter />
       </div>
       <Toaster position="top-center" richColors />
+      <BackToTop />
     </QueryClientProvider>
   );
 }
