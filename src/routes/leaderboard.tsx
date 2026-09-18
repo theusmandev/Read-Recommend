@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useInfiniteQuery, keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Trophy } from "lucide-react";
 import { fetchLeaderboard, fetchTopReaders } from "@/lib/community";
 import { cn, getLangAttr } from "@/lib/utils";
@@ -65,6 +65,18 @@ function Leaderboard() {
   });
 
   const allItems = chart.data?.pages.flat() ?? [];
+
+  const rankedReaders = useMemo(() => {
+    let currentRank = 0;
+    let currentScore = -1;
+    return (readersQuery.data ?? []).map((reader) => {
+      if (reader.approved_count !== currentScore) {
+        currentRank += 1;
+        currentScore = reader.approved_count;
+      }
+      return { ...reader, rank: currentRank };
+    });
+  }, [readersQuery.data]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -191,22 +203,24 @@ function Leaderboard() {
         ) : (
           readersQuery.isLoading ? (
             <p className="text-center text-sm text-muted-foreground">Loading top readers…</p>
-          ) : readersQuery.data && readersQuery.data.length > 0 ? (
+          ) : rankedReaders.length > 0 ? (
             <div className="space-y-3">
-              {readersQuery.data.map((reader, index) => (
-                <div
-                  key={reader.reader_id}
-                  className={cn(
-                    "flex items-center gap-4 rounded-2xl border bg-card px-5 py-4",
-                    index < 3 ? "border-gold/60 shadow-sm" : "border-border",
-                  )}
-                >
-                  <span className="w-9 text-center text-xl">
-                    {medals[index] ?? (
-                      <span className="font-serif text-base text-muted-foreground">{index + 1}</span>
+              {rankedReaders.map((reader) => {
+                const rankIndex = reader.rank - 1;
+                return (
+                  <div
+                    key={reader.reader_id}
+                    className={cn(
+                      "flex items-center gap-4 rounded-2xl border bg-card px-5 py-4",
+                      rankIndex < 3 ? "border-gold/60 shadow-sm" : "border-border",
                     )}
-                  </span>
-                  <div className="flex-1 min-w-0">
+                  >
+                    <span className="w-9 text-center text-xl">
+                      {medals[rankIndex] ?? (
+                        <span className="font-serif text-base text-muted-foreground">{reader.rank}</span>
+                      )}
+                    </span>
+                    <div className="flex-1 min-w-0">
                     <Link
                       to="/reader/$readerId"
                       params={{ readerId: reader.reader_id }}
@@ -222,7 +236,8 @@ function Leaderboard() {
                     </p>
                   </div>
                 </div>
-              ))}
+              );
+            })}
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center">
