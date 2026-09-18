@@ -203,7 +203,7 @@ export async function submitRecommendation(input: {
     p_name: input.readerName.trim(),
     p_email: input.readerEmail.trim(),
   });
-  if (readerError) throw readerError;
+  if (readerError) throw new Error(readerError.message);
 
   const { error } = await supabase.from("recommendations").insert({
     novel_id: novelId,
@@ -256,7 +256,7 @@ export async function getReaderId(name: string, email: string): Promise<string> 
     p_name: name.trim(),
     p_email: email.trim(),
   });
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return readerId;
 }
 

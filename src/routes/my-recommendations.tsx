@@ -78,6 +78,12 @@ function MyRecommendations() {
       return;
     }
 
+    const reservedNames = ["admin", "administrator", "moderator"];
+    if (reservedNames.includes(name.toLowerCase())) {
+      toast.error("This name is reserved.");
+      return;
+    }
+
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     if (!emailRegex.test(email)) {
       toast.error("Please enter a valid email address.");
@@ -92,8 +98,12 @@ function MyRecommendations() {
       localStorage.setItem("reader_id", id);
       setReaderId(id);
       setIsModalOpen(false);
-    } catch (e) {
-      toast.error("Failed to verify your identity.");
+    } catch (e: any) {
+      if (e instanceof Error && e.message === "This name is reserved.") {
+        toast.error("This name is reserved.");
+      } else {
+        toast.error("Failed to verify your identity.");
+      }
     } finally {
       setSavingIdentity(false);
     }

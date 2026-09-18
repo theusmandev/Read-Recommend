@@ -169,8 +169,16 @@ function Submit() {
         genre 
       });
       setDone(true);
-    } catch {
-      toast.error("Something went wrong. Please try again.");
+    } catch (err: any) {
+      if (err instanceof Error && err.message === "This name is reserved.") {
+        setModalErrors({ name: "This name is reserved." });
+        setIsModalOpen(true);
+        localStorage.removeItem("reader_name");
+        localStorage.removeItem("reader_email");
+        setSavedIdentity(null);
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
     } finally {
       setSaving(false);
     }
@@ -201,7 +209,13 @@ function Submit() {
     const errors: ModalFieldErrors = {};
     if (!name) {
       errors.name = "Please enter your name.";
+    } else {
+      const reservedNames = ["admin", "administrator", "moderator"];
+      if (reservedNames.includes(name.toLowerCase())) {
+        errors.name = "This name is reserved.";
+      }
     }
+    
     if (!email) {
       errors.email = "Please enter your email address.";
     } else {
