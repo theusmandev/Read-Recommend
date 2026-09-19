@@ -1,7 +1,10 @@
 name = "read-recommend"
-main = "dist/server/server.js"
+main = "cloudflare-entry.js"
 compatibility_date = "2026-09-11"
 compatibility_flags = ["nodejs_compat"]
+
+[triggers]
+crons = ["0 3 * * *"] # Run every day at 3:00 AM UTC
 
 [assets]
 directory = "dist/client"
@@ -16,3 +19,4 @@ enabled = true
 head_sampling_rate = 1
 invocation_logs = true
 persist = true
+
