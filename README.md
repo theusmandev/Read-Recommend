@@ -1,6 +1,18 @@
 # Readers' Suggestion Library
 
-A community-driven platform where Urdu novel readers can share and discover books that actually stayed with them. Not reviews, not ratings — just honest recommendations from people who read them and wanted others to know.
+**Made by readers, for readers.**
+
+> This is a non-commercial, community-built project — not a business.
+
+For a long time, I'd noticed something: so many people in our community read Urdu novels, discover incredible books, and share wonderful suggestions with each other — and then those recommendations vanish, buried in chat history as just another WhatsApp message. It felt like a small loss every time.
+
+That feeling is what first gave me the idea for this project. I even started building something earlier, but life got in the way and I couldn't launch it. The idea, though, never really left.
+
+So I asked myself: why not create a place of our own — somewhere our favourite stories and the reasons we loved them could actually be saved, remembered, and found by others?
+
+That question became **Readers' Suggestion Library**.
+
+This isn't meant to be just another website. It's a readers' community. You can recommend any novel you genuinely enjoyed — just share its name and tell others why they should read it. Other readers can then discover it, mark it as helpful, browse by genre, and see which novels the community has loved the most, whether this week, this month, or of all time. And your recommendations don't disappear — you can always find them again under "My Recommendations."
 
 The site lives at **[readers.urdunovelbanks.com](https://readers.urdunovelbanks.com/)** and is a sister project to [Urdu Novel Bank](https://www.urdunovelbanks.com/) and [Urdu Fiction Bank](https://urdufictionbank.com/).
 
