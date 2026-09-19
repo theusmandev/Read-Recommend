@@ -288,3 +288,13 @@ export async function fetchAllGenreCounts(): Promise<Record<string, number>> {
   counts["All"] = total;
   return counts;
 }
+
+export async function fetchTotalReaderCount(): Promise<number> {
+  const { data, error } = await supabase.rpc("get_total_reader_count");
+  if (error) {
+    console.error("Error fetching total reader count:", error);
+    return 0;
+  }
+  return Number(data ?? 0);
+}
+

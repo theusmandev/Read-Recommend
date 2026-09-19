@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { PenLine, Sparkles, Trophy } from "lucide-react";
 import { useState, useEffect } from "react";
-import { fetchFeed, fetchLeaderboard, fetchAllGenreCounts, getVotedIds } from "@/lib/community";
+import { fetchFeed, fetchLeaderboard, fetchAllGenreCounts, getVotedIds, fetchTotalReaderCount } from "@/lib/community";
 import { formatLargeNumber, getLangAttr } from "@/lib/utils";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import { useCountUp } from "@/hooks/use-count-up";
@@ -56,20 +56,43 @@ function Home() {
   const totalCount = countsQuery.data?.["All"] ?? 0;
   const animatedTotalCount = useCountUp(totalCount, 1500);
 
+  const readersQuery = useQuery({
+    queryKey: ["total-readers"],
+    queryFn: fetchTotalReaderCount,
+  });
+  const totalReaders = readersQuery.data ?? 0;
+  const animatedReadersCount = useCountUp(totalReaders, 1500);
+
   return (
     <div className="mx-auto max-w-4xl px-4 pb-4">
       <section className="paper mt-6 rounded-3xl border border-border px-6 py-8 text-center sm:py-12">
         {totalCount > 0 ? (
-          <div className="mx-auto mb-5 flex flex-col items-center justify-center">
-            <div className="relative inline-flex items-start">
-              <span className="font-serif text-5xl font-bold leading-none tracking-tight text-primary sm:text-6xl">
-                {formatLargeNumber(animatedTotalCount)}+
+          <div className="mx-auto mb-8 flex flex-col items-center justify-center gap-6 sm:flex-row sm:gap-12">
+            <div className="flex flex-col items-center justify-center">
+              <div className="relative inline-flex items-start">
+                <span className="font-serif text-5xl font-bold leading-none tracking-tight text-primary sm:text-6xl">
+                  {formatLargeNumber(animatedTotalCount)}+
+                </span>
+                <Sparkles className="absolute -right-6 -top-2 h-5 w-5 text-primary/50 sm:-right-8 sm:-top-3 sm:h-6 sm:w-6" aria-hidden="true" />
+              </div>
+              <span className="mt-3 font-serif text-sm font-medium tracking-wide text-muted-foreground sm:text-base">
+                Novels recommended
               </span>
-              <Sparkles className="absolute -right-6 -top-2 h-5 w-5 text-primary/50 sm:-right-8 sm:-top-3 sm:h-6 sm:w-6" aria-hidden="true" />
             </div>
-            <span className="mt-3 font-serif text-sm font-medium tracking-wide text-muted-foreground sm:text-base">
-              Novels recommended by readers
-            </span>
+            
+            <div className="hidden h-16 w-px bg-border sm:block" />
+            <div className="h-px w-16 bg-border sm:hidden" />
+            
+            <div className="flex flex-col items-center justify-center">
+              <div className="relative inline-flex items-start">
+                <span className="font-serif text-5xl font-bold leading-none tracking-tight text-primary sm:text-6xl">
+                  {formatLargeNumber(animatedReadersCount)}+
+                </span>
+              </div>
+              <span className="mt-3 font-serif text-sm font-medium tracking-wide text-muted-foreground sm:text-base">
+                Contributing readers
+              </span>
+            </div>
           </div>
         ) : (
           <div className="mx-auto mb-5 flex items-center justify-center gap-2">
