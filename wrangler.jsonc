@@ -1,0 +1,21 @@
+{
+  "name": "corevexal",
+  "main": "cloudflare-entry.js",
+  "compatibility_date": "2026-09-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "dist/client"
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true,
+      "persist": true
+    }
+  },
+  "triggers": {
+    "crons": ["0 3 * * *"]
+  }
+}
