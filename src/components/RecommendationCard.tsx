@@ -72,6 +72,12 @@ export function RecommendationCard({
         {item.reason}
       </p>
 
+      {item.status === 'rejected' && item.rejection_reason && (
+        <div className="mt-3 rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground border border-border/40">
+          <span className="font-semibold text-foreground/70">Note from admin:</span> {item.rejection_reason}
+        </div>
+      )}
+
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border/70 pt-3">
         <span
           className="text-sm text-muted-foreground truncate flex-1 min-w-0"

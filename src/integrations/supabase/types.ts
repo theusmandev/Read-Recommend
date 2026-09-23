@@ -77,6 +77,7 @@ export type Database = {
           reader_name: string | null
           reason: string
           status: string
+          rejection_reason: string | null
         }
         Insert: {
           created_at?: string
@@ -87,6 +88,7 @@ export type Database = {
           reader_name?: string | null
           reason: string
           status?: string
+          rejection_reason?: string | null
         }
         Update: {
           created_at?: string
@@ -97,6 +99,7 @@ export type Database = {
           reader_name?: string | null
           reason?: string
           status?: string
+          rejection_reason?: string | null
         }
         Relationships: [
           {

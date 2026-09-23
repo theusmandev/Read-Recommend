@@ -22,6 +22,8 @@ export const Route = createFileRoute("/admin")({
 
 function Admin() {
   const queryClient = useQueryClient();
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   // Check authentication & admin status
   const status = useQuery({
@@ -80,10 +82,10 @@ function Admin() {
   });
 
   const moderateMutation = useMutation({
-    mutationFn: async ({ id, action }: { id: string; action: "approved" | "rejected" }) => {
+    mutationFn: async ({ id, action, reason }: { id: string; action: "approved" | "rejected"; reason?: string }) => {
       const { error } = await supabase
         .from("recommendations")
-        .update({ status: action })
+        .update({ status: action, rejection_reason: reason || null })
         .eq("id", id);
       if (error) throw error;
     },
@@ -142,22 +144,63 @@ function Admin() {
               <p className="mt-2 text-sm text-muted-foreground break-words" dir="auto">
                 — {item.reader_name?.trim() ? item.reader_name : "A reader"}
               </p>
-              <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-3">
-                <button
-                  onClick={() => moderateMutation.mutate({ id: item.id, action: "approved" })}
-                  disabled={moderateMutation.isPending}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-3 sm:py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-                >
-                  <Check className="h-4 w-4" /> Approve
-                </button>
-                <button
-                  onClick={() => moderateMutation.mutate({ id: item.id, action: "rejected" })}
-                  disabled={moderateMutation.isPending}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full border border-border px-4 py-3 sm:py-2 text-sm font-semibold hover:bg-secondary disabled:opacity-50"
-                >
-                  <X className="h-4 w-4" /> Reject
-                </button>
-              </div>
+              {rejectingId === item.id ? (
+                <div className="mt-4 flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+                  <label htmlFor={`reject-reason-${item.id}`} className="text-sm font-semibold text-foreground">
+                    Reason (optional, shown to the reader)
+                  </label>
+                  <textarea
+                    id={`reject-reason-${item.id}`}
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    className="min-h-[80px] w-full rounded-xl border border-input bg-background p-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+                    placeholder="e.g. This novel doesn't meet our criteria..."
+                  />
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => {
+                        setRejectingId(null);
+                        setRejectReason("");
+                      }}
+                      disabled={moderateMutation.isPending}
+                      className="rounded-full px-4 py-2 text-sm font-medium hover:bg-secondary disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        moderateMutation.mutate({ id: item.id, action: "rejected", reason: rejectReason });
+                        setRejectingId(null);
+                        setRejectReason("");
+                      }}
+                      disabled={moderateMutation.isPending}
+                      className="rounded-full bg-red-500/10 text-red-600 border border-red-500/30 px-4 py-2 text-sm font-medium hover:bg-red-500/20 disabled:opacity-50"
+                    >
+                      Confirm Reject
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-3">
+                  <button
+                    onClick={() => moderateMutation.mutate({ id: item.id, action: "approved" })}
+                    disabled={moderateMutation.isPending}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-3 sm:py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+                  >
+                    <Check className="h-4 w-4" /> Approve
+                  </button>
+                  <button
+                    onClick={() => {
+                      setRejectingId(item.id);
+                      setRejectReason("");
+                    }}
+                    disabled={moderateMutation.isPending}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full border border-border px-4 py-3 sm:py-2 text-sm font-semibold hover:bg-secondary disabled:opacity-50"
+                  >
+                    <X className="h-4 w-4" /> Reject
+                  </button>
+                </div>
+              )}
             </div>
           ))
         ) : (

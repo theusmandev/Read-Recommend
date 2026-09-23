@@ -29,6 +29,7 @@ export type FeedItem = {
   helpful_count: number;
   created_at: string;
   status?: "pending" | "approved" | "rejected";
+  rejection_reason?: string | null;
   novels: { id: string; title: string; author_name: string } | null;
 };
 
@@ -219,7 +220,7 @@ export async function submitRecommendation(input: {
 export async function fetchMyRecommendations(readerId: string): Promise<FeedItem[]> {
   const { data, error } = await supabase
     .rpc("get_my_recommendations", { p_reader_id: readerId })
-    .select("id, reader_name, reason, genre, status, helpful_count, created_at, novels(id, title, author_name)");
+    .select("id, reader_name, reason, genre, status, rejection_reason, helpful_count, created_at, novels(id, title, author_name)");
 
   if (error) throw error;
   return (data ?? []) as unknown as FeedItem[];
