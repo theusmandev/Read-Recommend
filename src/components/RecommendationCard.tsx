@@ -76,7 +76,7 @@ export function RecommendationCard({
 
       {item.status === 'rejected' && item.rejection_reason && (
         <div className="mt-3 rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground border border-border/40 whitespace-pre-wrap">
-          <span className="font-semibold text-foreground/70">Note from admin:</span> {item.rejection_reason}
+          <span className="font-bold text-foreground">Note from admin:</span> {item.rejection_reason}
         </div>
       )}
 
