@@ -8,11 +8,13 @@ export function RecommendationCard({
   voted,
   onVote,
   onDelete,
+  onEdit,
 }: {
   item: FeedItem;
   voted: boolean;
   onVote?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onEdit?: (item: FeedItem) => void;
 }) {
   const [isVoting, setIsVoting] = useState(false);
 
@@ -87,6 +89,15 @@ export function RecommendationCard({
           — {item.reader_name?.trim() ? item.reader_name : "A reader"}
         </span>
         <div className="flex items-center gap-2">
+          {item.status === 'rejected' && onEdit && (
+            <button
+              type="button"
+              onClick={() => onEdit(item)}
+              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+            >
+              Edit & Resubmit
+            </button>
+          )}
           {onDelete && (
             <button
               type="button"

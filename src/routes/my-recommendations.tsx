@@ -6,7 +6,10 @@ import { toast } from "sonner";
 import {
   fetchMyRecommendations,
   deleteMyRecommendation,
+  updateAndResubmitRecommendation,
   getReaderId,
+  GENRES,
+  type Genre,
   type FeedItem,
 } from "@/lib/community";
 import { RecommendationCard } from "@/components/RecommendationCard";
@@ -42,6 +45,9 @@ function MyRecommendations() {
   const [modalEmail, setModalEmail] = useState("");
   const [savingIdentity, setSavingIdentity] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<FeedItem | null>(null);
+  const [itemToEdit, setItemToEdit] = useState<FeedItem | null>(null);
+  const [editReason, setEditReason] = useState("");
+  const [editGenre, setEditGenre] = useState<Genre | "">("");
 
   useEffect(() => {
     // Check localStorage for saved identity
@@ -129,6 +135,21 @@ function MyRecommendations() {
     },
   });
 
+  const editMutation = useMutation({
+    mutationFn: async ({ id, reason, genre }: { id: string; reason: string; genre: string }) => {
+      if (!readerId) throw new Error("Not identified");
+      await updateAndResubmitRecommendation(id, readerId, reason, genre);
+    },
+    onSuccess: () => {
+      toast.success("Recommendation updated and resubmitted!");
+      setItemToEdit(null);
+      queryClient.invalidateQueries({ queryKey: ["my-recommendations", readerId] });
+    },
+    onError: () => {
+      toast.error("Failed to resubmit recommendation");
+    },
+  });
+
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -161,6 +182,11 @@ function MyRecommendations() {
                   voted={false}
                   onDelete={(id) => {
                     setItemToDelete(item);
+                  }}
+                  onEdit={(itemToEdit) => {
+                    setItemToEdit(itemToEdit);
+                    setEditReason(itemToEdit.reason);
+                    setEditGenre(itemToEdit.genre as Genre);
                   }}
                 />
               ))}
@@ -254,6 +280,80 @@ function MyRecommendations() {
               Delete
             </button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!itemToEdit} onOpenChange={(open) => !open && setItemToEdit(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-xl">Edit & Resubmit</DialogTitle>
+            <DialogDescription className="mt-2">
+              Editing your recommendation for: <strong className="font-medium text-foreground">{itemToEdit?.novels?.title}</strong>
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (itemToEdit && editReason && editGenre) {
+                editMutation.mutate({
+                  id: itemToEdit.id,
+                  reason: editReason,
+                  genre: editGenre,
+                });
+              }
+            }}
+            className="mt-4 space-y-4"
+          >
+            <div>
+              <label className="block text-sm font-medium" htmlFor="editGenre">
+                Genre
+              </label>
+              <select
+                id="editGenre"
+                value={editGenre}
+                onChange={(e) => setEditGenre(e.target.value as Genre)}
+                required
+                className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="" disabled>Select a genre</option>
+                {GENRES.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium" htmlFor="editReason">
+                Why do you recommend it?
+              </label>
+              <textarea
+                id="editReason"
+                value={editReason}
+                onChange={(e) => setEditReason(e.target.value)}
+                required
+                rows={4}
+                dir="auto"
+                className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <div className="mt-6 flex flex-wrap justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setItemToEdit(null)}
+                className="rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={editMutation.isPending}
+                className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-70"
+              >
+                {editMutation.isPending ? "Submitting..." : "Resubmit"}
+              </button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

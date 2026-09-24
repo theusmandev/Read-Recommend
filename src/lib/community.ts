@@ -234,6 +234,21 @@ export async function deleteMyRecommendation(recommendationId: string, readerId:
   if (error) throw error;
 }
 
+export async function updateAndResubmitRecommendation(
+  recommendationId: string,
+  readerId: string,
+  reason: string,
+  genre: string
+) {
+  const { error } = await supabase.rpc("update_and_resubmit_recommendation", {
+    p_recommendation_id: recommendationId,
+    p_reader_id: readerId,
+    p_reason: reason.trim(),
+    p_genre: genre,
+  });
+  if (error) throw error;
+}
+
 export async function fetchReaderProfile(readerId: string) {
   const { data: recommendations, error } = await supabase
     .from("recommendations")
