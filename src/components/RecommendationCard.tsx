@@ -67,7 +67,7 @@ export function RecommendationCard({
       </div>
 
       <p
-        className="mt-3 text-[0.975rem] leading-relaxed text-foreground/90"
+        className="mt-3 text-[0.975rem] leading-relaxed text-foreground/90 whitespace-pre-wrap"
         dir="auto"
         lang={getLangAttr(item.reason)}
       >
@@ -75,7 +75,7 @@ export function RecommendationCard({
       </p>
 
       {item.status === 'rejected' && item.rejection_reason && (
-        <div className="mt-3 rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground border border-border/40">
+        <div className="mt-3 rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground border border-border/40 whitespace-pre-wrap">
           <span className="font-semibold text-foreground/70">Note from admin:</span> {item.rejection_reason}
         </div>
       )}
@@ -88,7 +88,7 @@ export function RecommendationCard({
         >
           — {item.reader_name?.trim() ? item.reader_name : "A reader"}
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {item.status === 'rejected' && onEdit && (
             <button
               type="button"
