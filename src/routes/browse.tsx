@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useInfiniteQuery, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { GENRES, fetchFeed, fetchAllGenreCounts, getVotedIds, toggleVoteHelpful, type SortKey } from "@/lib/community";
+import { fetchFeed, fetchAllGenreCounts, fetchGenres, getVotedIds, toggleVoteHelpful, type SortKey } from "@/lib/community";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import { cn } from "@/lib/utils";
 
@@ -33,8 +33,6 @@ export const Route = createFileRoute("/browse")({
   component: Browse,
 });
 
-const genreOptions = ["All", ...GENRES] as const;
-
 function Browse() {
   const [sort, setSort] = useState<SortKey>("newest");
   const [genre, setGenre] = useState<string>("All");
@@ -43,9 +41,22 @@ function Browse() {
 
   useEffect(() => setVoted(getVotedIds()), []);
 
+  const genresQuery = useQuery({
+    queryKey: ["genres"],
+    queryFn: fetchGenres,
+  });
+
+  const genreOptions = ["All", ...(genresQuery.data?.map(g => g.id) ?? [])];
+  
+  // Create a map to show genre names in the UI
+  const genreNamesMap = genresQuery.data?.reduce((acc, g) => {
+    acc[g.id] = g.name;
+    return acc;
+  }, {} as Record<string, string>) ?? {};
+
   const feed = useInfiniteQuery({
     queryKey: ["feed", sort, genre],
-    queryFn: ({ pageParam }) => fetchFeed({ sort, genre, limit: 30, offset: pageParam as number }),
+    queryFn: ({ pageParam }) => fetchFeed({ sort, genreId: genre, limit: 30, offset: pageParam as number }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => 
       lastPage.length === 30 ? allPages.length * 30 : undefined,
@@ -128,7 +139,7 @@ function Browse() {
       )}
 
       <h1 className="font-serif text-2xl font-bold sm:text-3xl flex items-center gap-2 flex-wrap">
-        {genre === "All" ? "All recommendations" : `${genre} recommendations`}
+        {genre === "All" ? "All recommendations" : `${genreNamesMap[genre] ?? 'Loading'} recommendations`}
       </h1>
       <p className="mt-2 text-muted-foreground">
         Every novel below was suggested by a reader in the community.
@@ -163,7 +174,7 @@ function Browse() {
                   : "border-border bg-card text-muted-foreground hover:bg-secondary",
               )}
             >
-              {option}
+              {option === "All" ? "All" : genreNamesMap[option]}
               {genreCounts[option] !== undefined && (
                 <span className="ml-1.5 inline-block opacity-70 text-[0.9em]">
                   ({genreCounts[option]})

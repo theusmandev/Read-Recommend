@@ -3,12 +3,13 @@ import { useEffect, useState } from "react";
 import { CheckCircle2, UserCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  GENRES,
   searchNovels,
   submitRecommendation,
+  fetchGenres,
   type Genre,
   type NovelMatch,
 } from "@/lib/community";
+import { useQuery } from "@tanstack/react-query";
 import { getLangAttr } from "@/lib/utils";
 import {
   Dialog,
@@ -80,7 +81,7 @@ function Submit() {
   const [matches, setMatches] = useState<NovelMatch[]>([]);
   
   const [reason, setReason] = useState("");
-  const [genre, setGenre] = useState<Genre>("Social");
+  const [genreId, setGenreId] = useState("");
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -102,6 +103,18 @@ function Submit() {
       setSavedIdentity({ name, email });
     }
   }, []);
+
+  const genresQuery = useQuery({
+    queryKey: ["genres"],
+    queryFn: fetchGenres,
+  });
+
+  // Set default genre once loaded
+  useEffect(() => {
+    if (genresQuery.data && genresQuery.data.length > 0 && !genreId) {
+      setGenreId(genresQuery.data[0].id);
+    }
+  }, [genresQuery.data, genreId]);
 
   // Fuzzy autocomplete against novels already in the library, so the same book
   // does not end up on the leaderboard under three different spellings.
@@ -150,7 +163,7 @@ function Submit() {
     if (!reason.trim()) {
       errors.reason = "Please tell us why you recommend this novel.";
     }
-    if (!genre) {
+    if (!genreId) {
       errors.genre = "Please select a genre.";
     }
     return errors;
@@ -158,6 +171,8 @@ function Submit() {
 
   async function performSubmit(name: string, email: string) {
     setSaving(true);
+    const genreName = genresQuery.data?.find(g => g.id === genreId)?.name || "Other";
+
     try {
       await submitRecommendation({ 
         novelId, 
@@ -166,7 +181,8 @@ function Submit() {
         readerName: name, 
         readerEmail: email,
         reason, 
-        genre 
+        genreId,
+        genreName
       });
       setDone(true);
     } catch (err: any) {
@@ -264,7 +280,7 @@ function Submit() {
   }
 
   function handleGenreChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    setGenre(event.target.value as Genre);
+    setGenreId(event.target.value);
     if (fieldErrors.genre) {
       setFieldErrors((prev) => ({ ...prev, genre: undefined }));
     }
@@ -409,17 +425,21 @@ function Submit() {
           </label>
           <select
             id="genre"
-            value={genre}
+            value={genreId}
             onChange={handleGenreChange}
             className={`${fieldErrorClass} ${fieldErrors.genre ? fieldErrorBorder : fieldNormalBorder}`}
             aria-invalid={!!fieldErrors.genre}
             aria-describedby={fieldErrors.genre ? "genre-error" : undefined}
           >
-            {GENRES.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
+            {genresQuery.isLoading ? (
+              <option value="">Loading genres...</option>
+            ) : (
+              genresQuery.data?.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))
+            )}
           </select>
           <FieldError message={fieldErrors.genre} />
         </div>

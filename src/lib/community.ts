@@ -3,29 +3,18 @@
 // only approved recommendations are readable, submissions always start pending.
 import { supabase } from "@/integrations/supabase/client";
 
-export const GENRES = [
-  "Social",
-  "Romance",
-  "Mystery",
-  "Historical",
-  "Fantasy",
-  "Islamic/Spiritual",
-  "Family Drama",
-  "Crime/Thriller",
-  "Tragedy",
-  "Comedy/Humor",
-  "Adventure",
-  "Classic",
-  "Self Help",
-  "Other",
-] as const;
-export type Genre = (typeof GENRES)[number];
+export type Genre = {
+  id: string;
+  name: string;
+  display_order: number;
+};
 
 export type FeedItem = {
   id: string;
   reader_name: string | null;
   reason: string;
   genre: string;
+  genre_id?: string;
   helpful_count: number;
   created_at: string;
   status?: "pending" | "approved" | "rejected";
@@ -68,7 +57,7 @@ export function rememberVote(id: string) {
 
 export async function fetchFeed(options: {
   sort: SortKey;
-  genre: string;
+  genreId: string;
   limit?: number;
   offset?: number;
 }): Promise<FeedItem[]> {
@@ -77,7 +66,7 @@ export async function fetchFeed(options: {
     .select("id, reader_name, reason, genre, helpful_count, created_at, novels(id, title, author_name)")
     .eq("status", "approved");
 
-  if (options.genre !== "All") query = query.eq("genre", options.genre);
+  if (options.genreId !== "All") query = query.eq("genre_id", options.genreId);
 
   query =
     options.sort === "helpful"
@@ -169,7 +158,8 @@ export async function submitRecommendation(input: {
   readerName: string;
   readerEmail: string;
   reason: string;
-  genre: Genre;
+  genreId: string;
+  genreName: string;
 }) {
   let novelId = input.novelId;
 
@@ -211,7 +201,8 @@ export async function submitRecommendation(input: {
     reader_name: input.readerName.trim() || null,
     reader_id: readerId,
     reason: input.reason.trim(),
-    genre: input.genre,
+    genre_id: input.genreId,
+    genre: input.genreName,
     status: "pending",
   });
   if (error) throw error;
@@ -220,7 +211,7 @@ export async function submitRecommendation(input: {
 export async function fetchMyRecommendations(readerId: string): Promise<FeedItem[]> {
   const { data, error } = await supabase
     .rpc("get_my_recommendations", { p_reader_id: readerId })
-    .select("id, reader_name, reason, genre, status, rejection_reason, helpful_count, created_at, novels(id, title, author_name)");
+    .select("id, reader_name, reason, genre, genre_id, status, rejection_reason, helpful_count, created_at, novels(id, title, author_name)");
 
   if (error) throw error;
   return (data ?? []) as unknown as FeedItem[];
@@ -238,13 +229,15 @@ export async function updateAndResubmitRecommendation(
   recommendationId: string,
   readerId: string,
   reason: string,
-  genre: string
+  genreId: string,
+  genreName: string
 ) {
   const { error } = await supabase.rpc("update_and_resubmit_recommendation", {
     p_recommendation_id: recommendationId,
     p_reader_id: readerId,
     p_reason: reason.trim(),
-    p_genre: genre,
+    p_genre_id: genreId,
+    p_genre: genreName,
   });
   if (error) throw error;
 }
@@ -276,29 +269,26 @@ export async function getReaderId(name: string, email: string): Promise<string> 
   return readerId;
 }
 
+export async function fetchGenres(): Promise<Genre[]> {
+  const { data, error } = await supabase
+    .from("genres")
+    .select("id, name, display_order")
+    .order("display_order", { ascending: true });
+  if (error) throw error;
+  return data as Genre[];
+}
+
 export async function fetchAllGenreCounts(): Promise<Record<string, number>> {
-  // Try the efficient RPC first (1 query)
   const { data, error } = await supabase.rpc("get_genre_counts");
-  
   if (error) {
-    // Fallback if migration hasn't applied yet
-    const promises = ["All", ...GENRES].map(async (genre) => {
-      let query = supabase.from("recommendations").select("*", { count: "exact", head: true }).eq("status", "approved");
-      if (genre !== "All") query = query.eq("genre", genre);
-      const { count } = await query;
-      return { genre, count: count ?? 0 };
-    });
-    const results = await Promise.all(promises);
-    return results.reduce((acc, curr) => {
-      acc[curr.genre] = curr.count;
-      return acc;
-    }, {} as Record<string, number>);
+    console.error("Error fetching genre counts:", error);
+    return { All: 0 };
   }
 
   const counts: Record<string, number> = { All: 0 };
   let total = 0;
   for (const row of data || []) {
-    counts[row.genre] = Number(row.count);
+    counts[row.genre_id] = Number(row.count);
     total += Number(row.count);
   }
   counts["All"] = total;

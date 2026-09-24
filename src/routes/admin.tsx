@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Lock, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchGenres, type Genre } from "@/lib/community";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -24,6 +25,7 @@ function Admin() {
   const queryClient = useQueryClient();
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [activeTab, setActiveTab] = useState<"pending" | "genres">("pending");
 
   // Check authentication & admin status
   const status = useQuery({
@@ -110,20 +112,42 @@ function Admin() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="font-serif text-2xl font-bold">Pending recommendations</h1>
-        <button
-          onClick={async () => {
-            await supabase.auth.signOut();
-            await queryClient.invalidateQueries();
-          }}
-          className="rounded-full border border-border bg-card px-4 py-1.5 text-sm hover:bg-secondary"
-        >
-          Logout
-        </button>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 className="font-serif text-2xl font-bold">Administration</h1>
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-full border border-border bg-card p-1">
+            <button
+              onClick={() => setActiveTab("pending")}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                activeTab === "pending" ? "bg-primary text-primary-foreground" : "hover:bg-secondary text-muted-foreground"
+              }`}
+            >
+              Pending
+            </button>
+            <button
+              onClick={() => setActiveTab("genres")}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                activeTab === "genres" ? "bg-primary text-primary-foreground" : "hover:bg-secondary text-muted-foreground"
+              }`}
+            >
+              Genres
+            </button>
+          </div>
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              await queryClient.invalidateQueries();
+            }}
+            className="rounded-full border border-border bg-card px-4 py-1.5 text-sm hover:bg-secondary"
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-6">
+        {activeTab === "pending" ? (
+          <div className="space-y-4">
         {pending.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading queue…</p>
         ) : pending.data && pending.data.length > 0 ? (
@@ -207,6 +231,194 @@ function Admin() {
           <p className="rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center text-muted-foreground">
             Nothing waiting for review right now.
           </p>
+        )}
+          </div>
+        ) : (
+          <ManageGenres />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ManageGenres() {
+  const queryClient = useQueryClient();
+  const [editingGenre, setEditingGenre] = useState<Genre | null>(null);
+  const [newGenreName, setNewGenreName] = useState("");
+  const [newGenreOrder, setNewGenreOrder] = useState("");
+
+  const genresQuery = useQuery({
+    queryKey: ["admin-genres"],
+    queryFn: fetchGenres,
+  });
+
+  const addMutation = useMutation({
+    mutationFn: async ({ name, display_order }: { name: string; display_order: number }) => {
+      const { error } = await supabase.rpc("add_genre", { p_name: name, p_display_order: display_order });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Genre added");
+      setNewGenreName("");
+      setNewGenreOrder("");
+      queryClient.invalidateQueries({ queryKey: ["admin-genres"] });
+      queryClient.invalidateQueries({ queryKey: ["genres"] });
+    },
+    onError: (e: any) => toast.error(e.message || "Failed to add genre"),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, name, display_order }: { id: string; name: string; display_order: number }) => {
+      const { error } = await supabase.rpc("update_genre", { p_id: id, p_name: name, p_display_order: display_order });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Genre updated");
+      setEditingGenre(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-genres"] });
+      queryClient.invalidateQueries({ queryKey: ["genres"] });
+    },
+    onError: (e: any) => toast.error(e.message || "Failed to update genre"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc("delete_genre", { p_id: id });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Genre deleted");
+      queryClient.invalidateQueries({ queryKey: ["admin-genres"] });
+      queryClient.invalidateQueries({ queryKey: ["genres"] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+    },
+    onError: (e: any) => toast.error(e.message || "Failed to delete genre"),
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <h2 className="font-serif text-lg font-semibold">Add New Genre</h2>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (newGenreName && newGenreOrder) {
+              addMutation.mutate({ name: newGenreName, display_order: parseInt(newGenreOrder, 10) });
+            }
+          }}
+          className="mt-4 flex flex-col sm:flex-row gap-3"
+        >
+          <input
+            type="text"
+            placeholder="Genre Name"
+            value={newGenreName}
+            onChange={(e) => setNewGenreName(e.target.value)}
+            required
+            className="flex-1 rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          />
+          <input
+            type="number"
+            placeholder="Order (e.g. 50)"
+            value={newGenreOrder}
+            onChange={(e) => setNewGenreOrder(e.target.value)}
+            required
+            className="w-32 rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          />
+          <button
+            type="submit"
+            disabled={addMutation.isPending}
+            className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+          >
+            Add
+          </button>
+        </form>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card overflow-hidden">
+        <div className="px-5 py-4 border-b border-border bg-secondary/30">
+          <h2 className="font-serif text-lg font-semibold">Manage Genres</h2>
+        </div>
+        {genresQuery.isLoading ? (
+          <p className="p-5 text-sm text-muted-foreground">Loading genres…</p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {genresQuery.data?.map((g) => (
+              <li key={g.id} className="p-5 flex items-center justify-between gap-4">
+                {editingGenre?.id === g.id ? (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      updateMutation.mutate({
+                        id: g.id,
+                        name: editingGenre.name,
+                        display_order: editingGenre.display_order,
+                      });
+                    }}
+                    className="flex-1 flex flex-col sm:flex-row gap-3"
+                  >
+                    <input
+                      type="text"
+                      value={editingGenre.name}
+                      onChange={(e) => setEditingGenre({ ...editingGenre, name: e.target.value })}
+                      className="flex-1 rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+                      required
+                    />
+                    <input
+                      type="number"
+                      value={editingGenre.display_order}
+                      onChange={(e) => setEditingGenre({ ...editingGenre, display_order: parseInt(e.target.value, 10) })}
+                      className="w-24 rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+                      required
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setEditingGenre(null)}
+                        className="rounded-full border border-border px-3 py-1.5 text-sm font-medium hover:bg-secondary"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={updateMutation.isPending}
+                        className="rounded-full bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{g.name}</p>
+                      <p className="text-xs text-muted-foreground">Order: {g.display_order}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setEditingGenre(g)}
+                        className="text-sm font-medium hover:underline text-muted-foreground"
+                      >
+                        Edit
+                      </button>
+                      {g.name !== "Other" && (
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Are you sure you want to delete "${g.name}"? All related recommendations will be reassigned to "Other".`)) {
+                              deleteMutation.mutate(g.id);
+                            }
+                          }}
+                          disabled={deleteMutation.isPending}
+                          className="text-sm font-medium text-red-500 hover:underline disabled:opacity-50"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </div>

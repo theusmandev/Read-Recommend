@@ -8,7 +8,7 @@ import {
   deleteMyRecommendation,
   updateAndResubmitRecommendation,
   getReaderId,
-  GENRES,
+  fetchGenres,
   type Genre,
   type FeedItem,
 } from "@/lib/community";
@@ -47,7 +47,7 @@ function MyRecommendations() {
   const [itemToDelete, setItemToDelete] = useState<FeedItem | null>(null);
   const [itemToEdit, setItemToEdit] = useState<FeedItem | null>(null);
   const [editReason, setEditReason] = useState("");
-  const [editGenre, setEditGenre] = useState<Genre | "">("");
+  const [editGenreId, setEditGenreId] = useState("");
 
   useEffect(() => {
     // Check localStorage for saved identity
@@ -121,6 +121,11 @@ function MyRecommendations() {
     enabled: !!readerId,
   });
 
+  const genresQuery = useQuery({
+    queryKey: ["genres"],
+    queryFn: fetchGenres,
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (recommendationId: string) => {
       if (!readerId) throw new Error("Not identified");
@@ -136,9 +141,9 @@ function MyRecommendations() {
   });
 
   const editMutation = useMutation({
-    mutationFn: async ({ id, reason, genre }: { id: string; reason: string; genre: string }) => {
+    mutationFn: async ({ id, reason, genreId, genreName }: { id: string; reason: string; genreId: string; genreName: string }) => {
       if (!readerId) throw new Error("Not identified");
-      await updateAndResubmitRecommendation(id, readerId, reason, genre);
+      await updateAndResubmitRecommendation(id, readerId, reason, genreId, genreName);
     },
     onSuccess: () => {
       toast.success("Recommendation updated and resubmitted!");
@@ -186,7 +191,16 @@ function MyRecommendations() {
                   onEdit={(itemToEdit) => {
                     setItemToEdit(itemToEdit);
                     setEditReason(itemToEdit.reason);
-                    setEditGenre(itemToEdit.genre as Genre);
+                    
+                    if (itemToEdit.genre_id) {
+                      setEditGenreId(itemToEdit.genre_id);
+                    } else if (genresQuery.data) {
+                      // Fallback for unmigrated data
+                      const match = genresQuery.data.find(g => g.name === itemToEdit.genre);
+                      setEditGenreId(match ? match.id : "");
+                    } else {
+                      setEditGenreId("");
+                    }
                   }}
                 />
               ))}
@@ -294,11 +308,13 @@ function MyRecommendations() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (itemToEdit && editReason && editGenre) {
+              if (itemToEdit && editReason && editGenreId) {
+                const genreName = genresQuery.data?.find(g => g.id === editGenreId)?.name || "Other";
                 editMutation.mutate({
                   id: itemToEdit.id,
                   reason: editReason,
-                  genre: editGenre,
+                  genreId: editGenreId,
+                  genreName,
                 });
               }
             }}
@@ -310,17 +326,21 @@ function MyRecommendations() {
               </label>
               <select
                 id="editGenre"
-                value={editGenre}
-                onChange={(e) => setEditGenre(e.target.value as Genre)}
+                value={editGenreId}
+                onChange={(e) => setEditGenreId(e.target.value)}
                 required
                 className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="" disabled>Select a genre</option>
-                {GENRES.map((g) => (
-                  <option key={g} value={g}>
-                    {g}
-                  </option>
-                ))}
+                {genresQuery.isLoading ? (
+                  <option disabled>Loading genres...</option>
+                ) : (
+                  genresQuery.data?.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name}
+                    </option>
+                  ))
+                )}
               </select>
             </div>
             <div>
