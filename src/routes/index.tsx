@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PenLine, Sparkles, Trophy } from "lucide-react";
 import { useState, useEffect } from "react";
-import { fetchFeed, fetchLeaderboard, fetchAllGenreCounts, getVotedIds, fetchTotalReaderCount } from "@/lib/community";
+import { fetchFeed, fetchLeaderboard, fetchAllGenreCounts, getVotedIds, fetchTotalReaderCount, toggleVoteHelpful, type FeedItem } from "@/lib/community";
 import { formatLargeNumber, getLangAttr } from "@/lib/utils";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import { useCountUp } from "@/hooks/use-count-up";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,15 +36,38 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const queryClient = useQueryClient();
   const [voted, setVoted] = useState<string[]>([]);
   
   useEffect(() => {
     setVoted(getVotedIds());
   }, []);
 
+  const handleVote = async (id: string) => {
+    try {
+      const { isVoted, newCount } = await toggleVoteHelpful(id);
+      if (isVoted) {
+        setVoted((prev) => [...prev, id]);
+        toast.success("Shukriya! Marked as helpful.");
+      } else {
+        setVoted((prev) => prev.filter((v) => v !== id));
+        toast.success("Vote removed.");
+      }
+
+      queryClient.setQueryData<FeedItem[]>(["feed", "helpful", "All", 3], (old) => {
+        if (!old) return old;
+        return old.map((item) => (item.id === id ? { ...item, helpful_count: newCount } : item));
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+    } catch {
+      toast.error("Could not record your vote. Please try again.");
+    }
+  };
+
   const top = useQuery({
     queryKey: ["feed", "helpful", "All", 3],
-    queryFn: () => fetchFeed({ sort: "helpful", genre: "All", limit: 3 }),
+    queryFn: () => fetchFeed({ sort: "helpful", genreId: "All", limit: 3 }),
   });
   const leaders = useQuery({
     queryKey: ["leaderboard", "all", "home"],
@@ -134,8 +158,26 @@ function Home() {
         <div className="mt-4 grid gap-4">
           {top.isLoading ? (
             <p className="text-sm text-muted-foreground">Loading recommendations…</p>
+          ) : top.isError ? (
+            <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6 text-center">
+              <p className="text-sm text-destructive">Could not load recommendations right now.</p>
+              <button
+                type="button"
+                onClick={() => top.refetch()}
+                className="mt-3 inline-flex items-center justify-center rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-secondary cursor-pointer"
+              >
+                Try again
+              </button>
+            </div>
           ) : top.data && top.data.length > 0 ? (
-            top.data.map((item) => <RecommendationCard key={item.id} item={item} voted={voted.includes(item.id)} />)
+            top.data.map((item) => (
+              <RecommendationCard
+                key={item.id}
+                item={item}
+                voted={voted.includes(item.id)}
+                onVote={handleVote}
+              />
+            ))
           ) : (
             <EmptyShelf />
           )}

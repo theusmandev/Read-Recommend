@@ -57,16 +57,21 @@ export function rememberVote(id: string) {
 
 export async function fetchFeed(options: {
   sort: SortKey;
-  genreId: string;
+  genreId?: string;
+  genre?: string;
   limit?: number;
   offset?: number;
 }): Promise<FeedItem[]> {
+  const targetGenre = options.genreId ?? options.genre;
+
   let query = supabase
     .from("recommendations")
     .select("id, reader_name, reason, genre, helpful_count, created_at, novels(id, title, author_name)")
     .eq("status", "approved");
 
-  if (options.genreId !== "All") query = query.eq("genre_id", options.genreId);
+  if (targetGenre && targetGenre !== "All") {
+    query = query.eq("genre_id", targetGenre);
+  }
 
   query =
     options.sort === "helpful"
@@ -77,7 +82,10 @@ export async function fetchFeed(options: {
     options.offset ?? 0,
     (options.offset ?? 0) + (options.limit ?? 30) - 1
   );
-  if (error) throw error;
+  if (error) {
+    console.error("[fetchFeed] Error fetching recommendations feed:", error);
+    throw error;
+  }
   return (data ?? []) as unknown as FeedItem[];
 }
 
