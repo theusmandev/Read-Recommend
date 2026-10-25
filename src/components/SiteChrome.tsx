@@ -114,7 +114,14 @@ export function SiteHeader() {
     if (path === "/browse") {
       queryClient.prefetchInfiniteQuery({
         queryKey: ["feed", "newest", "All"],
-        queryFn: () => fetchFeed({ sort: "newest", genreId: "All", limit: 30, offset: 0 }),
+        queryFn: ({ pageParam = 0, signal }) =>
+          fetchFeed({
+            sort: "newest",
+            genreId: "All",
+            limit: 30,
+            offset: (pageParam as number) ?? 0,
+            signal,
+          }),
         initialPageParam: 0,
       });
     } else if (path === "/leaderboard") {

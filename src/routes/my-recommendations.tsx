@@ -12,7 +12,7 @@ import {
   type Genre,
   type FeedItem,
 } from "@/lib/community";
-import { RecommendationCard } from "@/components/RecommendationCard";
+import { RecommendationCard, RecommendationCardSkeleton } from "@/components/RecommendationCard";
 import {
   Dialog,
   DialogContent,
@@ -177,7 +177,11 @@ function MyRecommendations() {
         <section className="mt-8">
           <h2 className="sr-only">Your submitted recommendations</h2>
           {isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading your recommendations…</p>
+            <div className="grid gap-4" aria-busy="true" aria-label="Loading your recommendations">
+              <RecommendationCardSkeleton />
+              <RecommendationCardSkeleton />
+              <RecommendationCardSkeleton />
+            </div>
           ) : recommendations && recommendations.length > 0 ? (
             <div className="grid gap-4">
               {recommendations.map((item) => (

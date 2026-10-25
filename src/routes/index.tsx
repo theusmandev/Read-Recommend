@@ -4,7 +4,7 @@ import { PenLine, Sparkles, Trophy } from "lucide-react";
 import { useState, useEffect } from "react";
 import { fetchFeed, fetchLeaderboard, fetchAllGenreCounts, getVotedIds, fetchTotalReaderCount, toggleVoteHelpful, type FeedItem } from "@/lib/community";
 import { formatLargeNumber, getLangAttr } from "@/lib/utils";
-import { RecommendationCard } from "@/components/RecommendationCard";
+import { RecommendationCard, RecommendationCardSkeleton } from "@/components/RecommendationCard";
 import { useCountUp } from "@/hooks/use-count-up";
 import { toast } from "sonner";
 
@@ -65,9 +65,24 @@ function Home() {
     }
   };
 
+  const handlePrefetchBrowse = () => {
+    queryClient.prefetchInfiniteQuery({
+      queryKey: ["feed", "newest", "All"],
+      queryFn: ({ pageParam = 0, signal }) =>
+        fetchFeed({
+          sort: "newest",
+          genreId: "All",
+          limit: 30,
+          offset: (pageParam as number) ?? 0,
+          signal,
+        }),
+      initialPageParam: 0,
+    });
+  };
+
   const top = useQuery({
     queryKey: ["feed", "helpful", "All", 3],
-    queryFn: () => fetchFeed({ sort: "helpful", genreId: "All", limit: 3 }),
+    queryFn: ({ signal }) => fetchFeed({ sort: "helpful", genreId: "All", limit: 3, signal }),
   });
   const leaders = useQuery({
     queryKey: ["leaderboard", "all", "home"],
@@ -141,6 +156,8 @@ function Home() {
           </Link>
           <Link
             to="/browse"
+            onMouseEnter={handlePrefetchBrowse}
+            onFocus={handlePrefetchBrowse}
             className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold transition-colors hover:bg-secondary"
           >
             See Recommendations
@@ -151,13 +168,22 @@ function Home() {
       <section className="mt-12">
         <div className="flex items-baseline justify-between">
           <h2 className="font-serif text-xl font-semibold">Most helpful right now</h2>
-          <Link to="/browse" className="text-sm text-muted-foreground underline underline-offset-4">
+          <Link
+            to="/browse"
+            onMouseEnter={handlePrefetchBrowse}
+            onFocus={handlePrefetchBrowse}
+            className="text-sm text-muted-foreground underline underline-offset-4"
+          >
             See all
           </Link>
         </div>
         <div className="mt-4 grid gap-4">
-          {top.isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading recommendations…</p>
+          {top.isLoading || (top.isFetching && !top.data) ? (
+            <>
+              <RecommendationCardSkeleton />
+              <RecommendationCardSkeleton />
+              <RecommendationCardSkeleton />
+            </>
           ) : top.isError ? (
             <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6 text-center">
               <p className="text-sm text-destructive">Could not load recommendations right now.</p>

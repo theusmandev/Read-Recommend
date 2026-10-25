@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ThumbsUp } from "lucide-react";
 import type { FeedItem } from "@/lib/community";
 import { cn, getLangAttr } from "@/lib/utils";
+export { RecommendationCardSkeleton, RecommendationCardSkeletonGrid } from "./RecommendationCardSkeleton";
 
 export function RecommendationCard({
   item,

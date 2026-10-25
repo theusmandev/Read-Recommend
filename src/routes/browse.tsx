@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useInfiniteQuery, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { fetchFeed, fetchAllGenreCounts, fetchGenres, getVotedIds, toggleVoteHelpful, type SortKey } from "@/lib/community";
-import { RecommendationCard } from "@/components/RecommendationCard";
+import { fetchFeed, fetchAllGenreCounts, fetchGenres, getVotedIds, toggleVoteHelpful, isAbortError, type SortKey } from "@/lib/community";
+import { RecommendationCard, RecommendationCardSkeleton } from "@/components/RecommendationCard";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/browse")({
@@ -43,7 +43,8 @@ function Browse() {
 
   const genresQuery = useQuery({
     queryKey: ["genres"],
-    queryFn: fetchGenres,
+    queryFn: ({ signal }) => fetchGenres(signal),
+    staleTime: 5 * 60 * 1000,
   });
 
   const genreOptions = ["All", ...(genresQuery.data?.map(g => g.id) ?? [])];
@@ -56,11 +57,23 @@ function Browse() {
 
   const feed = useInfiniteQuery({
     queryKey: ["feed", sort, genre],
-    queryFn: ({ pageParam }) => fetchFeed({ sort, genreId: genre, limit: 30, offset: pageParam as number }),
+    queryFn: ({ pageParam, signal }) =>
+      fetchFeed({
+        sort,
+        genreId: genre || "All",
+        limit: 30,
+        offset: pageParam as number,
+        signal,
+      }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => 
       lastPage.length === 30 ? allPages.length * 30 : undefined,
     placeholderData: keepPreviousData,
+    retry: (failureCount, error) => {
+      if (isAbortError(error)) return false;
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(400 * 2 ** attemptIndex, 1000),
   });
 
   const countsQuery = useQuery({
@@ -188,13 +201,14 @@ function Browse() {
       <h2 className="sr-only">Recommended novels</h2>
 
       <div className="mt-6 grid gap-4">
-        {feed.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading recommendations…</p>
-        ) : feed.isError ? (
-          <p className="text-sm text-destructive">Could not load recommendations right now.</p>
-        ) : allItems.length > 0 ? (
+        {allItems.length > 0 ? (
           <>
-            <div className={cn("grid gap-4 transition-opacity duration-300", feed.isPlaceholderData && "opacity-50 pointer-events-none")}>
+            <div
+              className={cn(
+                "grid gap-4 transition-opacity duration-300",
+                feed.isPlaceholderData && "opacity-50 pointer-events-none"
+              )}
+            >
               {allItems.map((item) => (
                 <RecommendationCard
                   key={item.id}
@@ -204,19 +218,57 @@ function Browse() {
                 />
               ))}
             </div>
-            
-            {feed.hasNextPage && (
+
+            {feed.isFetchingNextPage && (
+              <div className="grid gap-4 mt-4" aria-busy="true" aria-label="Loading more recommendations">
+                <RecommendationCardSkeleton />
+                <RecommendationCardSkeleton />
+              </div>
+            )}
+
+            {feed.hasNextPage && !feed.isFetchingNextPage && (
               <div className="mt-6 text-center">
                 <button
+                  type="button"
                   onClick={() => feed.fetchNextPage()}
-                  disabled={feed.isFetchingNextPage}
-                  className="rounded-full border border-border bg-card px-6 py-2.5 text-sm font-semibold transition-colors hover:bg-secondary disabled:opacity-50"
+                  className="rounded-full border border-border bg-card px-6 py-2.5 text-sm font-semibold transition-colors hover:bg-secondary cursor-pointer"
                 >
-                  {feed.isFetchingNextPage ? "Loading more..." : "Load more"}
+                  Load more
+                </button>
+              </div>
+            )}
+
+            {feed.isError && !feed.isFetching && (
+              <div className="mt-4 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-center">
+                <p className="text-xs text-destructive">Could not load additional recommendations.</p>
+                <button
+                  type="button"
+                  onClick={() => feed.refetch()}
+                  className="mt-1 text-xs font-semibold text-primary underline underline-offset-2 cursor-pointer"
+                >
+                  Try again
                 </button>
               </div>
             )}
           </>
+        ) : feed.isError && !feed.isFetching ? (
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-8 text-center">
+            <p className="text-sm font-medium text-destructive">Unable to load recommendations right now.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Please check your connection and try again.</p>
+            <button
+              type="button"
+              onClick={() => feed.refetch()}
+              className="mt-4 inline-flex items-center justify-center rounded-full border border-border bg-card px-5 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-secondary cursor-pointer"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : feed.isLoading || feed.isFetching ? (
+          <div className="grid gap-4" aria-busy="true" aria-label="Loading recommendations">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <RecommendationCardSkeleton key={i} />
+            ))}
+          </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center">
             <p className="font-serif text-lg">No recommendations here yet — be the first!</p>

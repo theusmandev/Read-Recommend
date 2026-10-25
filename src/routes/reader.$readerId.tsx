@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { fetchReaderProfile, getVotedIds, toggleVoteHelpful } from "@/lib/community";
-import { RecommendationCard } from "@/components/RecommendationCard";
+import { RecommendationCard, RecommendationCardSkeleton } from "@/components/RecommendationCard";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/reader/$readerId")({
@@ -78,9 +78,22 @@ function ReaderProfile() {
 
       <div className="mt-6 grid gap-4">
         {profileQuery.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading recommendations…</p>
+          <>
+            <RecommendationCardSkeleton />
+            <RecommendationCardSkeleton />
+            <RecommendationCardSkeleton />
+          </>
         ) : profileQuery.isError ? (
-          <p className="text-sm text-destructive">Could not load reader profile.</p>
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6 text-center">
+            <p className="text-sm text-destructive">Could not load reader profile.</p>
+            <button
+              type="button"
+              onClick={() => profileQuery.refetch()}
+              className="mt-3 inline-flex items-center justify-center rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-secondary cursor-pointer"
+            >
+              Try again
+            </button>
+          </div>
         ) : recommendations.length > 0 ? (
           <div className="grid gap-4">
             {recommendations.map((item) => (

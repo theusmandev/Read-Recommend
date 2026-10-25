@@ -55,13 +55,36 @@ export function rememberVote(id: string) {
   localStorage.setItem("unb_voted", JSON.stringify([...voted]));
 }
 
+export function isAbortError(err: unknown): boolean {
+  if (!err) return false;
+  if (typeof err === "object") {
+    const errorObj = err as Record<string, unknown>;
+    const message = typeof errorObj.message === "string" ? errorObj.message.toLowerCase() : "";
+    const name = typeof errorObj.name === "string" ? errorObj.name : "";
+    const hint = typeof errorObj.hint === "string" ? errorObj.hint.toLowerCase() : "";
+    return (
+      name === "AbortError" ||
+      message.includes("aborted") ||
+      message.includes("aborterror") ||
+      hint.includes("aborted") ||
+      errorObj.code === 20
+    );
+  }
+  return false;
+}
+
 export async function fetchFeed(options: {
   sort: SortKey;
   genreId?: string;
   genre?: string;
   limit?: number;
   offset?: number;
+  signal?: AbortSignal;
 }): Promise<FeedItem[]> {
+  if (options.signal?.aborted) {
+    return [];
+  }
+
   const targetGenre = options.genreId ?? options.genre;
 
   let query = supabase
@@ -78,15 +101,31 @@ export async function fetchFeed(options: {
       ? query.order("helpful_count", { ascending: false }).order("created_at", { ascending: false })
       : query.order("created_at", { ascending: false });
 
-  const { data, error } = await query.range(
-    options.offset ?? 0,
-    (options.offset ?? 0) + (options.limit ?? 30) - 1
-  );
-  if (error) {
-    console.error("[fetchFeed] Error fetching recommendations feed:", error);
-    throw error;
+  if (options.signal) {
+    query = query.abortSignal(options.signal);
   }
-  return (data ?? []) as unknown as FeedItem[];
+
+  try {
+    const { data, error } = await query.range(
+      options.offset ?? 0,
+      (options.offset ?? 0) + (options.limit ?? 30) - 1
+    );
+
+    if (error) {
+      if (options.signal?.aborted || isAbortError(error)) {
+        return [];
+      }
+      console.error("[fetchFeed] Error fetching recommendations feed:", error);
+      throw error;
+    }
+
+    return (data ?? []) as unknown as FeedItem[];
+  } catch (err: unknown) {
+    if (options.signal?.aborted || isAbortError(err)) {
+      return [];
+    }
+    throw err;
+  }
 }
 
 export type LeaderRow = {
@@ -277,13 +316,29 @@ export async function getReaderId(name: string, email: string): Promise<string> 
   return readerId;
 }
 
-export async function fetchGenres(): Promise<Genre[]> {
-  const { data, error } = await supabase
+export async function fetchGenres(signal?: AbortSignal): Promise<Genre[]> {
+  if (signal?.aborted) return [];
+  let query = supabase
     .from("genres")
     .select("id, name, display_order")
     .order("display_order", { ascending: true });
-  if (error) throw error;
-  return data as Genre[];
+
+  if (signal) {
+    query = query.abortSignal(signal);
+  }
+
+  try {
+    const { data, error } = await query;
+    if (error) {
+      if (signal?.aborted || isAbortError(error)) return [];
+      console.error("[fetchGenres] Error fetching genres:", error);
+      throw error;
+    }
+    return (data ?? []) as Genre[];
+  } catch (err: unknown) {
+    if (signal?.aborted || isAbortError(err)) return [];
+    throw err;
+  }
 }
 
 export async function fetchAllGenreCounts(): Promise<Record<string, number>> {
