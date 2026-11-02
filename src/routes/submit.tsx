@@ -106,7 +106,8 @@ function Submit() {
 
   const genresQuery = useQuery({
     queryKey: ["genres"],
-    queryFn: fetchGenres,
+    queryFn: ({ signal }) => fetchGenres(signal),
+    staleTime: 5 * 60 * 1000,
   });
 
   // Set default genre once loaded
@@ -420,9 +421,20 @@ function Submit() {
 
         {/* Genre */}
         <div>
-          <label className="block text-sm font-medium" htmlFor="genre">
-            Genre
-          </label>
+          <div className="flex items-center justify-between">
+            <label className="block text-sm font-medium" htmlFor="genre">
+              Genre
+            </label>
+            {genresQuery.isError && (
+              <button
+                type="button"
+                onClick={() => genresQuery.refetch()}
+                className="text-xs font-semibold text-primary underline underline-offset-2 hover:opacity-80 cursor-pointer"
+              >
+                Retry loading genres
+              </button>
+            )}
+          </div>
           <select
             id="genre"
             value={genreId}
@@ -430,11 +442,16 @@ function Submit() {
             className={`${fieldErrorClass} ${fieldErrors.genre ? fieldErrorBorder : fieldNormalBorder}`}
             aria-invalid={!!fieldErrors.genre}
             aria-describedby={fieldErrors.genre ? "genre-error" : undefined}
+            disabled={genresQuery.isLoading}
           >
             {genresQuery.isLoading ? (
               <option value="">Loading genres...</option>
+            ) : genresQuery.isError ? (
+              <option value="">Failed to load genres — click retry above</option>
+            ) : !genresQuery.data || genresQuery.data.length === 0 ? (
+              <option value="">No genres available</option>
             ) : (
-              genresQuery.data?.map((g) => (
+              genresQuery.data.map((g) => (
                 <option key={g.id} value={g.id}>
                   {g.name}
                 </option>

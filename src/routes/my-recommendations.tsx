@@ -123,7 +123,8 @@ function MyRecommendations() {
 
   const genresQuery = useQuery({
     queryKey: ["genres"],
-    queryFn: fetchGenres,
+    queryFn: ({ signal }) => fetchGenres(signal),
+    staleTime: 5 * 60 * 1000,
   });
 
   const deleteMutation = useMutation({
@@ -325,21 +326,37 @@ function MyRecommendations() {
             className="mt-4 space-y-4"
           >
             <div>
-              <label className="block text-sm font-medium" htmlFor="editGenre">
-                Genre
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium" htmlFor="editGenre">
+                  Genre
+                </label>
+                {genresQuery.isError && (
+                  <button
+                    type="button"
+                    onClick={() => genresQuery.refetch()}
+                    className="text-xs font-semibold text-primary underline underline-offset-2 hover:opacity-80 cursor-pointer"
+                  >
+                    Retry loading
+                  </button>
+                )}
+              </div>
               <select
                 id="editGenre"
                 value={editGenreId}
                 onChange={(e) => setEditGenreId(e.target.value)}
                 required
+                disabled={genresQuery.isLoading}
                 className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="" disabled>Select a genre</option>
                 {genresQuery.isLoading ? (
-                  <option disabled>Loading genres...</option>
+                  <option disabled value="">Loading genres...</option>
+                ) : genresQuery.isError ? (
+                  <option disabled value="">Failed to load genres — click retry above</option>
+                ) : !genresQuery.data || genresQuery.data.length === 0 ? (
+                  <option disabled value="">No genres available</option>
                 ) : (
-                  genresQuery.data?.map((g) => (
+                  genresQuery.data.map((g) => (
                     <option key={g.id} value={g.id}>
                       {g.name}
                     </option>

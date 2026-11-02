@@ -73,6 +73,22 @@ export function isAbortError(err: unknown): boolean {
   return false;
 }
 
+export function extractAbortSignal(arg: unknown): AbortSignal | undefined {
+  if (typeof AbortSignal !== "undefined" && arg instanceof AbortSignal) {
+    return arg;
+  }
+  if (
+    arg &&
+    typeof arg === "object" &&
+    "signal" in arg &&
+    typeof AbortSignal !== "undefined" &&
+    (arg as { signal?: unknown }).signal instanceof AbortSignal
+  ) {
+    return (arg as { signal: AbortSignal }).signal;
+  }
+  return undefined;
+}
+
 export async function fetchFeed(options: {
   sort: SortKey;
   genreId?: string;
@@ -81,7 +97,8 @@ export async function fetchFeed(options: {
   offset?: number;
   signal?: AbortSignal;
 }): Promise<FeedItem[]> {
-  if (options.signal?.aborted) {
+  const signal = extractAbortSignal(options?.signal);
+  if (signal?.aborted) {
     return [];
   }
 
@@ -101,8 +118,8 @@ export async function fetchFeed(options: {
       ? query.order("helpful_count", { ascending: false }).order("created_at", { ascending: false })
       : query.order("created_at", { ascending: false });
 
-  if (options.signal) {
-    query = query.abortSignal(options.signal);
+  if (signal) {
+    query = query.abortSignal(signal);
   }
 
   try {
@@ -112,7 +129,7 @@ export async function fetchFeed(options: {
     );
 
     if (error) {
-      if (options.signal?.aborted || isAbortError(error)) {
+      if (signal?.aborted || isAbortError(error)) {
         return [];
       }
       console.error("[fetchFeed] Error fetching recommendations feed:", error);
@@ -121,7 +138,7 @@ export async function fetchFeed(options: {
 
     return (data ?? []) as unknown as FeedItem[];
   } catch (err: unknown) {
-    if (options.signal?.aborted || isAbortError(err)) {
+    if (signal?.aborted || isAbortError(err)) {
       return [];
     }
     throw err;
@@ -316,8 +333,12 @@ export async function getReaderId(name: string, email: string): Promise<string> 
   return readerId;
 }
 
-export async function fetchGenres(signal?: AbortSignal): Promise<Genre[]> {
+export async function fetchGenres(
+  optionsOrSignal?: AbortSignal | { signal?: AbortSignal }
+): Promise<Genre[]> {
+  const signal = extractAbortSignal(optionsOrSignal);
   if (signal?.aborted) return [];
+
   let query = supabase
     .from("genres")
     .select("id, name, display_order")

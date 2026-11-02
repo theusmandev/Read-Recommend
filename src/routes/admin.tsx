@@ -249,7 +249,7 @@ function ManageGenres() {
 
   const genresQuery = useQuery({
     queryKey: ["admin-genres"],
-    queryFn: fetchGenres,
+    queryFn: ({ signal }) => fetchGenres(signal),
   });
 
   const addMutation = useMutation({
@@ -339,10 +339,27 @@ function ManageGenres() {
           <h2 className="font-serif text-lg font-semibold">Manage Genres</h2>
         </div>
         {genresQuery.isLoading ? (
-          <p className="p-5 text-sm text-muted-foreground">Loading genres…</p>
+          <div className="p-6 space-y-3">
+            <div className="h-4 w-1/3 bg-muted animate-pulse rounded" />
+            <div className="h-4 w-1/2 bg-muted animate-pulse rounded" />
+            <div className="h-4 w-1/4 bg-muted animate-pulse rounded" />
+          </div>
+        ) : genresQuery.isError ? (
+          <div className="p-6 text-center space-y-3">
+            <p className="text-sm text-destructive">Failed to load genres.</p>
+            <button
+              type="button"
+              onClick={() => genresQuery.refetch()}
+              className="rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 cursor-pointer"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : !genresQuery.data || genresQuery.data.length === 0 ? (
+          <p className="p-5 text-sm text-muted-foreground text-center">No genres found.</p>
         ) : (
           <ul className="divide-y divide-border">
-            {genresQuery.data?.map((g) => (
+            {genresQuery.data.map((g) => (
               <li key={g.id} className="p-5 flex items-center justify-between gap-4">
                 {editingGenre?.id === g.id ? (
                   <form
