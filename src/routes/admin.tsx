@@ -5,6 +5,16 @@ import { Check, Lock, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchGenres, type Genre } from "@/lib/community";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -244,6 +254,7 @@ function Admin() {
 function ManageGenres() {
   const queryClient = useQueryClient();
   const [editingGenre, setEditingGenre] = useState<Genre | null>(null);
+  const [deletingGenre, setDeletingGenre] = useState<Genre | null>(null);
   const [newGenreName, setNewGenreName] = useState("");
   const [newGenreOrder, setNewGenreOrder] = useState("");
 
@@ -288,6 +299,7 @@ function ManageGenres() {
     },
     onSuccess: () => {
       toast.success("Genre deleted");
+      setDeletingGenre(null);
       queryClient.invalidateQueries({ queryKey: ["admin-genres"] });
       queryClient.invalidateQueries({ queryKey: ["genres"] });
       queryClient.invalidateQueries({ queryKey: ["feed"] });
@@ -419,13 +431,10 @@ function ManageGenres() {
                       </button>
                       {g.name !== "Other" && (
                         <button
-                          onClick={() => {
-                            if (window.confirm(`Are you sure you want to delete "${g.name}"? All related recommendations will be reassigned to "Other".`)) {
-                              deleteMutation.mutate(g.id);
-                            }
-                          }}
+                          type="button"
+                          onClick={() => setDeletingGenre(g)}
                           disabled={deleteMutation.isPending}
-                          className="text-sm font-medium text-red-500 hover:underline disabled:opacity-50"
+                          className="text-sm font-medium text-destructive hover:underline disabled:opacity-50 cursor-pointer"
                         >
                           Delete
                         </button>
@@ -438,6 +447,46 @@ function ManageGenres() {
           </ul>
         )}
       </div>
+
+      <AlertDialog
+        open={Boolean(deletingGenre)}
+        onOpenChange={(open) => {
+          if (!open && !deleteMutation.isPending) {
+            setDeletingGenre(null);
+          }
+        }}
+      >
+        <AlertDialogContent className="rounded-3xl border border-border bg-card p-6 shadow-xl sm:max-w-md">
+          <AlertDialogHeader className="space-y-2 text-left">
+            <AlertDialogTitle className="font-serif text-xl font-bold">
+              Delete Genre
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-relaxed text-muted-foreground">
+              Are you sure you want to delete &ldquo;{deletingGenre?.name}&rdquo;? All related recommendations will be reassigned to &ldquo;Other&rdquo;.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 flex flex-row justify-end gap-3 sm:space-x-0">
+            <AlertDialogCancel
+              disabled={deleteMutation.isPending}
+              className="rounded-full border border-border bg-card px-5 py-2 text-sm font-semibold transition-colors hover:bg-secondary cursor-pointer"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteMutation.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                if (deletingGenre) {
+                  deleteMutation.mutate(deletingGenre.id);
+                }
+              }}
+              className="rounded-full bg-destructive text-destructive-foreground px-5 py-2 text-sm font-semibold hover:bg-destructive/90 transition-opacity disabled:opacity-50 cursor-pointer"
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
