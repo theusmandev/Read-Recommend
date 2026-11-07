@@ -81,7 +81,7 @@ function UrduNovelBankLogo({ className }: { className?: string }) {
       viewBox="120 615 1010 400"
       role="img"
       aria-labelledby="unb-footer-logo-title"
-      className={className ?? "w-40 sm:w-48 md:w-52 h-auto block mx-auto"}
+      className={className ?? "w-32 sm:w-36 md:w-40 h-auto block mx-auto"}
     >
       <title id="unb-footer-logo-title">اردو ناول بینک</title>
       <defs>
@@ -308,20 +308,20 @@ export function SiteFooter() {
       </div>
 
       {/* Powered by section */}
-      <div className="mt-7 flex flex-col items-center justify-center">
-        <div className="flex items-center justify-center gap-2.5">
-          <span className="h-px w-6 bg-[#8a400a]/25" aria-hidden="true" />
+      <div className="mt-6 flex flex-col items-center justify-center">
+        <div className="flex items-center justify-center gap-2">
+          <span className="h-px w-5 bg-[#8a400a]/25" aria-hidden="true" />
           <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8a400a]/80 sm:text-[11px]">
             POWERED BY
           </span>
-          <span className="h-px w-6 bg-[#8a400a]/25" aria-hidden="true" />
+          <span className="h-px w-5 bg-[#8a400a]/25" aria-hidden="true" />
         </div>
         <a
           href="https://www.urdunovelbanks.com"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Urdu Novel Bank"
-          className="mt-1.5 inline-block transition-all duration-200 hover:opacity-90 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+          className="mt-0.5 inline-block transition-all duration-200 hover:opacity-90 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
         >
           <UrduNovelBankLogo />
         </a>
