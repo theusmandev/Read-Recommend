@@ -31,6 +31,36 @@ export const Route = createFileRoute("/admin")({
   component: Admin,
 });
 
+const REJECTION_TEMPLATES = [
+  {
+    id: "short-reason",
+    label: "Short Reason",
+    text: `Aapki recommendation ke liye shukriya! Bas ek chhoti si baat — Recommendation Reason thodi short hai, aur doosre readers ko ye samajhne mein madad nahi karti ke ye novel unke liye kyun perfect ho sakta hai.
+
+Thoda detail mein likhein — jaise: kahani ka kya khaas pehlu tha jo aapko pasand aaya (characters, twist, emotions, writing style)? Kis type ke reader ko ye zaroor pasand aayegi? ya agar is novel ka jumla ya koi bat achi lagi ho to wo bhi add kar dain.
+
+Ap "My Recommendations" mein se apni recommendation edit karke dobara submit kar saktay hain.
+
+Shukriya❤️`,
+  },
+  {
+    id: "incomplete-details",
+    label: "Incomplete / Unclear Details",
+    text: `Aapki recommendation ke liye shukriya! Is submission mein novel ka naam ya writer ka naam complete/clear nahi hai.
+
+Meherbani farma kar "My Recommendations" mein ja kar sahi novel title aur writer ka naam update kar ke dobara submit kar dein taake doosre readers isay asani se dhoond sakein.
+
+Shukriya❤️`,
+  },
+  {
+    id: "duplicate",
+    label: "Duplicate / Already Submitted",
+    text: `Aapki recommendation ke liye shukriya! Ye novel aapki taraf se ya platform par pehle se isi tarah submit ho chuka hai. Agar aap is novel ke baray mein koi naya aur detailed review share karna chahein to zaroor karein.
+
+Shukriya❤️`,
+  },
+] as const;
+
 function Admin() {
   const queryClient = useQueryClient();
   const [rejectingId, setRejectingId] = useState<string | null>(null);
@@ -180,15 +210,38 @@ function Admin() {
               </p>
               {rejectingId === item.id ? (
                 <div className="mt-4 flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
-                  <label htmlFor={`reject-reason-${item.id}`} className="text-sm font-semibold text-foreground">
-                    Reason (optional, shown to the reader)
-                  </label>
+                  <div className="space-y-2">
+                    <label htmlFor={`reject-reason-${item.id}`} className="block text-sm font-semibold text-foreground">
+                      Reason (optional, shown to the reader)
+                    </label>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-muted-foreground">Quick templates:</span>
+                      {REJECTION_TEMPLATES.map((tmpl) => {
+                        const isSelected = rejectReason === tmpl.text;
+                        return (
+                          <button
+                            key={tmpl.id}
+                            type="button"
+                            onClick={() => setRejectReason(tmpl.text)}
+                            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors cursor-pointer ${
+                              isSelected
+                                ? "border-primary bg-primary/15 text-primary font-semibold shadow-xs"
+                                : "border-border bg-secondary/50 text-foreground hover:bg-primary/10 hover:border-primary/40"
+                            }`}
+                          >
+                            {tmpl.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                   <textarea
                     id={`reject-reason-${item.id}`}
                     value={rejectReason}
+                    rows={5}
                     onChange={(e) => setRejectReason(e.target.value)}
-                    className="min-h-[80px] w-full rounded-xl border border-input bg-background p-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-                    placeholder="e.g. This novel doesn't meet our criteria..."
+                    className="min-h-[130px] w-full rounded-xl border border-input bg-background p-3 text-sm leading-relaxed outline-none focus:ring-2 focus:ring-ring"
+                    placeholder="Select a quick template above or write your own custom reason..."
                   />
                   <div className="flex justify-end gap-2">
                     <button
